@@ -9,6 +9,7 @@ import { ChatRow } from "../components/chat-ui/sidebar/ChatRow"
 import { LocalProjectsSection } from "../components/chat-ui/sidebar/LocalProjectsSection"
 import type { SidebarData, SidebarChatRow } from "../../shared/types"
 import type { SocketStatus } from "./socket"
+import { useProjectGroupOrderStore } from "../stores/projectGroupOrderStore"
 
 interface KannaSidebarProps {
   data: SidebarData
@@ -52,6 +53,30 @@ export function KannaSidebar({
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   const [newProjectOpen, setNewProjectOpen] = useState(false)
   const chatsPerProject = 10
+
+  const savedOrder = useProjectGroupOrderStore((s) => s.order)
+  const setGroupOrder = useProjectGroupOrderStore((s) => s.setOrder)
+
+  const orderedProjectGroups = useMemo(() => {
+    if (savedOrder.length === 0) return data.projectGroups
+
+    const groupMap = new Map(data.projectGroups.map((g) => [g.groupKey, g]))
+    const ordered = savedOrder
+      .filter((key) => groupMap.has(key))
+      .map((key) => groupMap.get(key)!)
+
+    const orderedKeys = new Set(savedOrder)
+    for (const group of data.projectGroups) {
+      if (!orderedKeys.has(group.groupKey)) ordered.push(group)
+    }
+
+    return ordered
+  }, [data.projectGroups, savedOrder])
+
+  const handleReorderGroups = useCallback(
+    (newOrder: string[]) => setGroupOrder(newOrder),
+    [setGroupOrder]
+  )
 
   const projectIdByPath = useMemo(
     () => new Map(data.projectGroups.map((group) => [group.localPath, group.groupKey])),
@@ -250,7 +275,8 @@ export function KannaSidebar({
             ) : null}
 
             <LocalProjectsSection
-              projectGroups={data.projectGroups}
+              projectGroups={orderedProjectGroups}
+              onReorderGroups={handleReorderGroups}
               collapsedSections={collapsedSections}
               expandedGroups={expandedGroups}
               onToggleSection={toggleSection}

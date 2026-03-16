@@ -342,7 +342,7 @@ export function useKannaState(activeChatId: string | null): KannaState {
     if (!project) return
     const projectName = project.localPath.split("/").filter(Boolean).pop() ?? project.localPath
     const confirmed = await dialog.confirm({
-      title: "Remove Project",
+      title: "Remove",
       description: `Remove "${projectName}" from the sidebar? Existing chats will be removed from ${APP_NAME}.`,
       confirmLabel: "Remove",
       confirmVariant: "destructive",

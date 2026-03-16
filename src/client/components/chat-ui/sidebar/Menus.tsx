@@ -32,7 +32,7 @@ export function ProjectSectionMenu({
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors text-destructive dark:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-500/20"
         >
           <Trash2 className="h-4 w-4" />
-          <span className="text-xs font-medium">Remove Project</span>
+          <span className="text-xs font-medium">Remove</span>
         </button>
       </PopoverContent>
     </Popover>
