@@ -84,25 +84,25 @@ export function ChatPage() {
                 </div>
               </div>
             ) : (
-              <div
-                className="animate-fade-in space-y-5 pt-[72px] max-w-[800px] mx-auto"
-                style={{ paddingBottom: state.transcriptPaddingBottom }}
-              >
-                <KannaTranscript
-                  messages={state.messages}
-                  isLoading={state.isProcessing}
-                  localPath={state.runtime?.localPath}
-                  latestToolIds={state.latestToolIds}
-                  onAskUserQuestionSubmit={state.handleAskUserQuestion}
-                  onExitPlanModeConfirm={state.handleExitPlanMode}
-                />
-                {state.isProcessing ? <ProcessingMessage status={state.runtime?.status} /> : null}
-                {state.commandError ? (
-                  <div className="text-sm text-destructive border border-destructive/20 bg-destructive/5 rounded-xl px-4 py-3">
-                    {state.commandError}
-                  </div>
-                ) : null}
-              </div>
+              <>
+                <div className="animate-fade-in space-y-5 pt-[72px] max-w-[800px] mx-auto">
+                  <KannaTranscript
+                    messages={state.messages}
+                    isLoading={state.isProcessing}
+                    localPath={state.runtime?.localPath}
+                    latestToolIds={state.latestToolIds}
+                    onAskUserQuestionSubmit={state.handleAskUserQuestion}
+                    onExitPlanModeConfirm={state.handleExitPlanMode}
+                  />
+                  {state.isProcessing ? <ProcessingMessage status={state.runtime?.status} /> : null}
+                  {state.commandError ? (
+                    <div className="text-sm text-destructive border border-destructive/20 bg-destructive/5 rounded-xl px-4 py-3">
+                      {state.commandError}
+                    </div>
+                  ) : null}
+                </div>
+                <div style={{ height: state.transcriptPaddingBottom }} aria-hidden="true" />
+              </>
             )}
           </ScrollArea>
 

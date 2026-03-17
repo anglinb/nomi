@@ -282,12 +282,12 @@ export function AskUserQuestionMessage({ message, onSubmit, isLatest }: Props) {
                   !isLast && "border-b border-border"
                 )}
               >
-                <span className="text-sm">{question.question}</span>
-                {answerValue.length > 0 && <span className="text-sm font-medium text-right">{answerValue.join(", ")}</span>}
+                <div className="text-sm text-pretty">{question.question}</div>
+                {answerValue.length > 0 && <div className="text-sm font-medium text-right max-w-[50%] text-pretty">{answerValue.join(", ")}</div>}
                 {answerValue.length === 0 && (
-                  <span className="text-sm font-medium text-right italic">
+                  <div className="text-sm font-medium text-right italic">
                     {isDiscarded ? "Discarded" : "No Response"}
-                  </span>
+                  </div>
                 )}
               </div>
             )
