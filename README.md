@@ -27,11 +27,13 @@
 ## Quickstart
 
 ```bash
-if ! command -v bun >/dev/null 2>&1; then
-  curl -fsSL https://bun.sh/install | bash
-fi
-
 bun install -g kanna-code
+```
+
+If Bun isn't installed, install it first:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
 ```
 
 Then run from any project directory:
@@ -78,14 +80,16 @@ Local File System (~/.kanna/data/, project dirs)
 
 ## Install
 
-Install Bun if needed, then install Kanna globally:
+Install Kanna globally:
 
 ```bash
-if ! command -v bun >/dev/null 2>&1; then
-  curl -fsSL https://bun.sh/install | bash
-fi
-
 bun install -g kanna-code
+```
+
+If Bun isn't installed, install it first:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
 ```
 
 Or clone and build from source:
