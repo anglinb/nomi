@@ -29,6 +29,7 @@ export function ChatNavbar({
     <CardHeader
       className={cn(
         "absolute top-0 md:top-2 left-0 right-0 z-10 px-2.5 pr-4 border-border/0 md:pb-0 flex items-center justify-center",
+        sidebarCollapsed ? "md:px-2.5 md:pr-4" : "md:px-4 md:pr-4",
         "backdrop-blur-lg md:backdrop-blur-none bg-gradient-to-b from-background md:from-transparent border-b border-x-0 md:border-x border-border md:border-none"
       )}
     >
