@@ -268,7 +268,7 @@ export function ChatPage() {
           >
             <div
               ref={terminalVisualRef}
-              className="h-full min-h-0 overflow-hidden"
+              className="h-full min-h-0 overflow-hidden relative"
               data-terminal-open={showTerminalPane ? "true" : "false"}
               data-terminal-animated="false"
               data-terminal-visual
@@ -276,21 +276,23 @@ export function ChatPage() {
                 "--terminal-toggle-duration": `${TERMINAL_TOGGLE_ANIMATION_DURATION_MS}ms`,
               } as CSSProperties}
             >
-              <TerminalWorkspace
-                projectId={projectId}
-                layout={terminalLayout}
-                onAddTerminal={addTerminal}
-                socket={state.socket}
-                connectionStatus={state.connectionStatus}
-                scrollback={scrollback}
-                minColumnWidth={minColumnWidth}
-                focusRequestVersion={terminalFocusRequestVersion}
-                onRemoveTerminal={(currentProjectId, terminalId) => {
-                  void state.socket.command({ type: "terminal.close", terminalId }).catch(() => {})
-                  removeTerminal(currentProjectId, terminalId)
-                }}
-                onTerminalLayout={setTerminalSizes}
-              />
+              <div className="h-[500px]"> // this  needs to be fixed to the height of the pannel, whether it is up or down
+                <TerminalWorkspace
+                  projectId={projectId}
+                  layout={terminalLayout}
+                  onAddTerminal={addTerminal}
+                  socket={state.socket}
+                  connectionStatus={state.connectionStatus}
+                  scrollback={scrollback}
+                  minColumnWidth={minColumnWidth}
+                  focusRequestVersion={terminalFocusRequestVersion}
+                  onRemoveTerminal={(currentProjectId, terminalId) => {
+                    void state.socket.command({ type: "terminal.close", terminalId }).catch(() => {})
+                    removeTerminal(currentProjectId, terminalId)
+                  }}
+                  onTerminalLayout={setTerminalSizes}
+                />
+              </div>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>

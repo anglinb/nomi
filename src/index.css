@@ -409,6 +409,16 @@
     }
   }
 
+  @keyframes kanna-cursor-fade-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
   .kanna-empty-state-flower {
     animation: kanna-empty-state-flower-in 0.399s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
     transform-origin: center;
@@ -433,6 +443,10 @@
     height: 1.05em;
     background-color: currentColor;
     animation: kanna-cursor-blink 0.9s step-end infinite;
+  }
+
+  .kanna-typewriter-cursor[data-typing-complete="true"] {
+    animation: kanna-cursor-fade-out 0.24s ease-out forwards;
   }
 
 }

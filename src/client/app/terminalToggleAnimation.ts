@@ -1,4 +1,4 @@
-export const TERMINAL_TOGGLE_ANIMATION_DURATION_MS = 350
+export const TERMINAL_TOGGLE_ANIMATION_DURATION_MS = 3050
 
 const TAILWIND_EASE_IN_OUT: [number, number, number, number] = [0.4, 0, 0.2, 1]
 const NEWTON_ITERATIONS = 8

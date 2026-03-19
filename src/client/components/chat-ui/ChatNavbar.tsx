@@ -1,4 +1,4 @@
-import { Flower, Code, FolderOpen, Menu, PanelLeft, SquarePen, Terminal } from "lucide-react"
+import { Flower, Code, FolderOpen, Menu, PanelLeft, PanelRight, SquarePen, Terminal } from "lucide-react"
 import { Button } from "../ui/button"
 import { CardHeader } from "../ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
@@ -12,6 +12,8 @@ interface Props {
   localPath?: string
   embeddedTerminalVisible?: boolean
   onToggleEmbeddedTerminal?: () => void
+  rightSidebarVisible?: boolean
+  onToggleRightSidebar?: () => void
   onOpenExternal?: (action: "open_finder" | "open_editor") => void
   editorLabel?: string
 }
@@ -24,6 +26,8 @@ export function ChatNavbar({
   localPath,
   embeddedTerminalVisible = false,
   onToggleEmbeddedTerminal,
+  rightSidebarVisible = false,
+  onToggleRightSidebar,
   onOpenExternal,
   editorLabel = "Editor",
 }: Props) {
@@ -118,6 +122,20 @@ export function ChatNavbar({
               ) : null}
             </>
           )}
+          {onToggleRightSidebar ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleRightSidebar}
+              title="Toggle right sidebar"
+              className={cn(
+                "border border-border/0",
+                rightSidebarVisible && "text-white"
+              )}
+            >
+              <PanelRight className="h-4.5 w-4.5" />
+            </Button>
+          ) : null}
         </div>
       </div>
     </CardHeader>
