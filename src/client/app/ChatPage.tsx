@@ -23,9 +23,11 @@ const CHAT_NAVBAR_OFFSET_PX = 72
 
 export function ChatPage() {
   const state = useOutletContext<KannaState>()
+  const layoutRootRef = useRef<HTMLDivElement>(null)
   const chatCardRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
   const [typedEmptyStateText, setTypedEmptyStateText] = useState("")
+  const [fixedTerminalHeight, setFixedTerminalHeight] = useState(0)
   const projectId = state.runtime?.projectId ?? null
   const projectTerminalLayout = useTerminalLayoutStore((store) => (projectId ? store.projects[projectId] : undefined))
   const terminalLayout = projectTerminalLayout ?? DEFAULT_PROJECT_TERMINAL_LAYOUT
@@ -108,6 +110,25 @@ export function ChatPage() {
 
     return () => window.cancelAnimationFrame(frameId)
   }, [state.messages.length, state.scrollRef])
+
+  useEffect(() => {
+    const element = layoutRootRef.current
+    if (!element || !shouldRenderTerminalLayout) return
+
+    const updateHeight = () => {
+      const containerHeight = element.getBoundingClientRect().height
+      if (containerHeight <= 0) return
+      const nextHeight = containerHeight * (terminalLayout.mainSizes[1] / 100)
+      if (nextHeight <= 0) return
+      setFixedTerminalHeight((current) => (Math.abs(current - nextHeight) < 1 ? current : nextHeight))
+    }
+
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(element)
+    updateHeight()
+
+    return () => observer.disconnect()
+  }, [projectId, shouldRenderTerminalLayout, terminalLayout.mainSizes])
 
   const chatCard = (
     <Card ref={chatCardRef} className="bg-background h-full flex flex-col overflow-hidden border-0 rounded-none relative">
@@ -237,7 +258,7 @@ export function ChatPage() {
   )
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 relative">
+    <div ref={layoutRootRef} className="flex-1 flex flex-col min-w-0 relative">
       {shouldRenderTerminalLayout && projectId ? (
         <ResizablePanelGroup
           key={projectId}
@@ -276,7 +297,7 @@ export function ChatPage() {
                 "--terminal-toggle-duration": `${TERMINAL_TOGGLE_ANIMATION_DURATION_MS}ms`,
               } as CSSProperties}
             >
-              <div className="h-[500px]"> // this  needs to be fixed to the height of the pannel, whether it is up or down
+              <div style={fixedTerminalHeight > 0 ? { height: `${fixedTerminalHeight}px` } : undefined}>
                 <TerminalWorkspace
                   projectId={projectId}
                   layout={terminalLayout}
