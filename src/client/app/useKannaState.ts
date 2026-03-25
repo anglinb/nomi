@@ -70,6 +70,10 @@ export function getUiUpdateRestartReconnectAction(
   return "none"
 }
 
+export function shouldAutoFollowTranscript(distanceFromBottom: number) {
+  return distanceFromBottom < 24
+}
+
 const FIXED_TRANSCRIPT_PADDING_BOTTOM = 320
 const UI_UPDATE_RESTART_STORAGE_KEY = "kanna:ui-update-restart"
 
@@ -213,6 +217,7 @@ export function useKannaState(activeChatId: string | null): KannaState {
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLDivElement>(null)
+  const autoFollowTranscriptRef = useRef(true)
 
   useEffect(() => socket.onStatus(setConnectionStatus), [socket])
 
@@ -338,6 +343,11 @@ export function useKannaState(activeChatId: string | null): KannaState {
     }
   }, [chatSnapshot, pendingChatId])
 
+  useEffect(() => {
+    autoFollowTranscriptRef.current = true
+    setIsAtBottom(true)
+  }, [activeChatId])
+
   useLayoutEffect(() => {
     const element = inputRef.current
     if (!element) return
@@ -385,24 +395,31 @@ export function useKannaState(activeChatId: string | null): KannaState {
   )
 
   useEffect(() => {
-    const element = scrollRef.current
-    if (!element) return
-    const distance = element.scrollHeight - element.scrollTop - element.clientHeight
-    if (shouldPinTranscriptToBottom(distance)) {
-      element.scrollTo({ top: element.scrollHeight, behavior: "smooth" })
-    }
+    if (!autoFollowTranscriptRef.current) return
+
+    const frameId = window.requestAnimationFrame(() => {
+      const element = scrollRef.current
+      if (!element || !autoFollowTranscriptRef.current) return
+      element.scrollTo({ top: element.scrollHeight, behavior: "auto" })
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
   }, [activeChatId, inputHeight, messages.length, runtime?.status])
 
   function updateScrollState() {
     const element = scrollRef.current
     if (!element) return
     const distance = element.scrollHeight - element.scrollTop - element.clientHeight
-    setIsAtBottom(distance < 24)
+    const nextIsAtBottom = shouldAutoFollowTranscript(distance)
+    autoFollowTranscriptRef.current = nextIsAtBottom
+    setIsAtBottom(nextIsAtBottom)
   }
 
   function scrollToBottom() {
     const element = scrollRef.current
     if (!element) return
+    autoFollowTranscriptRef.current = true
+    setIsAtBottom(true)
     element.scrollTo({ top: element.scrollHeight, behavior: "smooth" })
   }
 
