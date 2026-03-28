@@ -394,16 +394,26 @@ const ChatInputInner = forwardRef<HTMLTextAreaElement, Props>(function ChatInput
                 () => setComposerModel(model)
               )
             }}
-            onClaudeReasoningEffortChange={(effort) => setReasoningEffort(effort)}
-            onClaudeContextWindowChange={(contextWindow) => setClaudeContextWindow(contextWindow)}
-            onCodexReasoningEffortChange={(effort) => setReasoningEffort(effort)}
-            onCodexFastModeChange={(fastMode) => {
-              updateLockedOrComposer(
-                (state) => state.provider === "claude"
-                  ? state
-                  : { ...state, modelOptions: { ...state.modelOptions, fastMode } },
-                () => setComposerModelOptions({ fastMode })
-              )
+            onModelOptionChange={(change) => {
+              switch (change.type) {
+                case "claudeReasoningEffort":
+                  setReasoningEffort(change.effort)
+                  break
+                case "codexReasoningEffort":
+                  setReasoningEffort(change.effort)
+                  break
+                case "contextWindow":
+                  setClaudeContextWindow(change.contextWindow)
+                  break
+                case "fastMode":
+                  updateLockedOrComposer(
+                    (state) => state.provider === "claude"
+                      ? state
+                      : { ...state, modelOptions: { ...state.modelOptions, fastMode: change.fastMode } },
+                    () => setComposerModelOptions({ fastMode: change.fastMode })
+                  )
+                  break
+              }
             }}
             planMode={providerPrefs.planMode}
             onPlanModeChange={setEffectivePlanMode}

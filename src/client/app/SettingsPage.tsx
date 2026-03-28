@@ -863,14 +863,13 @@ export function SettingsPage() {
                           onModelChange={(_, model) => {
                             setProviderDefaultModel("claude", model)
                           }}
-                          onClaudeReasoningEffortChange={(reasoningEffort) => {
-                            setProviderDefaultModelOptions("claude", { reasoningEffort })
+                          onModelOptionChange={(change) => {
+                            if (change.type === "claudeReasoningEffort") {
+                              setProviderDefaultModelOptions("claude", { reasoningEffort: change.effort })
+                            } else if (change.type === "contextWindow") {
+                              setProviderDefaultModelOptions("claude", { contextWindow: change.contextWindow })
+                            }
                           }}
-                          onClaudeContextWindowChange={(contextWindow) => {
-                            setProviderDefaultModelOptions("claude", { contextWindow })
-                          }}
-                          onCodexReasoningEffortChange={() => {}}
-                          onCodexFastModeChange={() => {}}
                           planMode={providerDefaults.claude.planMode}
                           onPlanModeChange={(planMode) => setProviderDefaultPlanMode("claude", planMode)}
                           includePlanMode
@@ -895,13 +894,12 @@ export function SettingsPage() {
                           onModelChange={(_, model) => {
                             setProviderDefaultModel("codex", model)
                           }}
-                          onClaudeReasoningEffortChange={() => {}}
-                          onClaudeContextWindowChange={() => {}}
-                          onCodexReasoningEffortChange={(reasoningEffort) => {
-                            setProviderDefaultModelOptions("codex", { reasoningEffort })
-                          }}
-                          onCodexFastModeChange={(fastMode) => {
-                            setProviderDefaultModelOptions("codex", { fastMode })
+                          onModelOptionChange={(change) => {
+                            if (change.type === "codexReasoningEffort") {
+                              setProviderDefaultModelOptions("codex", { reasoningEffort: change.effort })
+                            } else if (change.type === "fastMode") {
+                              setProviderDefaultModelOptions("codex", { fastMode: change.fastMode })
+                            }
                           }}
                           planMode={providerDefaults.codex.planMode}
                           onPlanModeChange={(planMode) => setProviderDefaultPlanMode("codex", planMode)}

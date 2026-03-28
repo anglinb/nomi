@@ -13,10 +13,7 @@ describe("ChatPreferenceControls", () => {
         modelOptions={{ reasoningEffort: "xhigh", fastMode: true }}
         onProviderChange={() => {}}
         onModelChange={() => {}}
-        onClaudeReasoningEffortChange={() => {}}
-        onClaudeContextWindowChange={() => {}}
-        onCodexReasoningEffortChange={() => {}}
-        onCodexFastModeChange={() => {}}
+        onModelOptionChange={() => {}}
         includePlanMode={false}
       />
     )
@@ -37,10 +34,7 @@ describe("ChatPreferenceControls", () => {
         modelOptions={{ reasoningEffort: "max", contextWindow: "1m" }}
         onProviderChange={() => {}}
         onModelChange={() => {}}
-        onClaudeReasoningEffortChange={() => {}}
-        onClaudeContextWindowChange={() => {}}
-        onCodexReasoningEffortChange={() => {}}
-        onCodexFastModeChange={() => {}}
+        onModelOptionChange={() => {}}
         planMode
         onPlanModeChange={() => {}}
         includePlanMode

@@ -131,6 +131,12 @@ export function InputPopover({
   )
 }
 
+export type ModelOptionChange =
+  | { type: "claudeReasoningEffort"; effort: ClaudeReasoningEffort }
+  | { type: "contextWindow"; contextWindow: ClaudeContextWindow }
+  | { type: "codexReasoningEffort"; effort: CodexReasoningEffort }
+  | { type: "fastMode"; fastMode: boolean }
+
 interface ChatPreferenceControlsProps {
   availableProviders: ProviderCatalogEntry[]
   selectedProvider: AgentProvider
@@ -140,10 +146,7 @@ interface ChatPreferenceControlsProps {
   modelOptions: ClaudeModelOptions | CodexModelOptions
   onProviderChange?: (provider: AgentProvider) => void
   onModelChange: (provider: AgentProvider, model: string) => void
-  onClaudeReasoningEffortChange: (effort: ClaudeReasoningEffort) => void
-  onClaudeContextWindowChange: (contextWindow: ClaudeContextWindow) => void
-  onCodexReasoningEffortChange: (effort: CodexReasoningEffort) => void
-  onCodexFastModeChange: (fastMode: boolean) => void
+  onModelOptionChange: (change: ModelOptionChange) => void
   planMode?: boolean
   onPlanModeChange?: (planMode: boolean) => void
   includePlanMode?: boolean
@@ -159,10 +162,7 @@ export function ChatPreferenceControls({
   modelOptions,
   onProviderChange,
   onModelChange,
-  onClaudeReasoningEffortChange,
-  onClaudeContextWindowChange,
-  onCodexReasoningEffortChange,
-  onCodexFastModeChange,
+  onModelOptionChange,
   planMode = false,
   onPlanModeChange,
   includePlanMode = true,
@@ -251,7 +251,7 @@ export function ChatPreferenceControls({
               <PopoverMenuItem
                 key={effort.id}
                 onClick={() => {
-                  onClaudeReasoningEffortChange(effort.id)
+                  onModelOptionChange({ type: "claudeReasoningEffort", effort: effort.id })
                   close()
                 }}
                 selected={modelOptions.reasoningEffort === effort.id}
@@ -264,7 +264,7 @@ export function ChatPreferenceControls({
               <PopoverMenuItem
                 key={effort.id}
                 onClick={() => {
-                  onCodexReasoningEffortChange(effort.id)
+                  onModelOptionChange({ type: "codexReasoningEffort", effort: effort.id })
                   close()
                 }}
                 selected={modelOptions.reasoningEffort === effort.id}
@@ -288,7 +288,7 @@ export function ChatPreferenceControls({
             <PopoverMenuItem
               key={option.id}
                 onClick={() => {
-                  onClaudeContextWindowChange(option.id)
+                  onModelOptionChange({ type: "contextWindow", contextWindow: option.id })
                   close()
                 }}
                 selected={selectedContextWindow === option.id}
@@ -318,7 +318,7 @@ export function ChatPreferenceControls({
             <>
               <PopoverMenuItem
                 onClick={() => {
-                  onCodexFastModeChange(false)
+                  onModelOptionChange({ type: "fastMode", fastMode: false })
                   close()
                 }}
                 selected={!codexModelOptions?.fastMode}
@@ -327,7 +327,7 @@ export function ChatPreferenceControls({
               />
               <PopoverMenuItem
                 onClick={() => {
-                  onCodexFastModeChange(true)
+                  onModelOptionChange({ type: "fastMode", fastMode: true })
                   close()
                 }}
                 selected={Boolean(codexModelOptions?.fastMode)}
