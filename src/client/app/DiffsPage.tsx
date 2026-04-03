@@ -24,13 +24,7 @@ export function DiffsPage() {
           </button>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto">
-          {projectId ? (
-            <DiffView onSendAll={(message) => void state.handleSend(message)} />
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              <span className="text-sm">Start a chat to view diffs</span>
-            </div>
-          )}
+          <DiffView onSendAll={(message) => void state.handleSend(message)} />
         </div>
       </div>
     </div>

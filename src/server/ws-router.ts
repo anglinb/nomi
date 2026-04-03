@@ -293,7 +293,7 @@ export function createWsRouter({
           break
         }
         case "git.diff": {
-          const project = store.getProject(command.projectId)
+          const project = store.getProject(command.projectId ?? store.getDefaultProjectId())
           if (!project) {
             throw new Error("Project not found")
           }

@@ -12,19 +12,19 @@ import type { NomiSocket } from "../app/socket"
  */
 export function useGitDiff(
   socket: NomiSocket | null,
-  projectId: string | null,
+  projectId: string | null | undefined,
   isVisible: boolean,
 ) {
   const fetchInFlightRef = useRef(false)
 
   const fetchDiff = useCallback(async () => {
-    if (!socket || !projectId || fetchInFlightRef.current) return
+    if (!socket || fetchInFlightRef.current) return
     fetchInFlightRef.current = true
 
     try {
       const result = await socket.command<{ diff: string }>({
         type: "git.diff",
-        projectId,
+        ...(projectId ? { projectId } : {}),
       })
 
       const files = parseUnifiedDiff(result.diff)
