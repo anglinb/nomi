@@ -129,7 +129,7 @@ export function VsCodePane({ projectId, socket, connectionStatus, onClose }: VsC
             )}
             <iframe
               ref={iframeRef}
-              src={`http://127.0.0.1:${snapshot.port}/?folder=${encodeURIComponent(snapshot.cwd ?? "")}`}
+              src={`/vscode/${snapshot.projectId}/?folder=${encodeURIComponent(snapshot.cwd ?? "")}`}
               className={cn("w-full h-full border-0", !iframeLoaded && "opacity-0")}
               allow="clipboard-read; clipboard-write"
               onLoad={() => setIframeLoaded(true)}

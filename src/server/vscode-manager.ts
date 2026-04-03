@@ -120,6 +120,12 @@ export class VsCodeManager {
     return session ? this.snapshotOf(session) : null
   }
 
+  /** Quick port lookup for the reverse proxy — returns null if not running. */
+  getPort(projectId: string): number | null {
+    const session = this.sessions.get(projectId)
+    return session?.status === "running" ? session.port : null
+  }
+
   private snapshotOf(session: VsCodeSession): VsCodeSnapshot {
     return {
       projectId: session.projectId,
