@@ -1,0 +1,18 @@
+# Keep Docker build context small — only the Dockerfile COPY commands
+# determine what actually ends up in the image, but everything not
+# ignored here gets sent to the Docker daemon (slow on large repos).
+
+.git
+node_modules
+dev-example
+.agents
+.claude
+.playwright-cli
+lib/vscode-server
+assets
+scripts
+ci
+test
+*.log
+.env*
+.DS_Store

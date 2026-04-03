@@ -50,3 +50,8 @@ export type ProcessedInterruptedMessage = Extract<
   import("../../../shared/types").HydratedTranscriptMessage,
   { kind: "interrupted" }
 >
+
+export type ProcessedAuthStatusMessage = Extract<
+  import("../../../shared/types").HydratedTranscriptMessage,
+  { kind: "auth_status" }
+>

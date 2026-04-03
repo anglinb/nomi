@@ -15,6 +15,8 @@ import { InterruptedMessage } from "../components/messages/InterruptedMessage"
 import { CompactBoundaryMessage, ContextClearedMessage } from "../components/messages/CompactBoundaryMessage"
 import { CompactSummaryMessage } from "../components/messages/CompactSummaryMessage"
 import { StatusMessage } from "../components/messages/StatusMessage"
+import { AuthStatusMessage } from "../components/messages/AuthStatusMessage"
+import { LoginPrompt } from "../components/messages/LoginPrompt"
 import { CollapsedToolGroup } from "../components/messages/CollapsedToolGroup"
 import { OpenLocalLinkProvider } from "../components/messages/shared"
 import { CHAT_SELECTION_ZONE_ATTRIBUTE } from "./chatFocusPolicy"
@@ -72,6 +74,10 @@ interface NomiTranscriptProps {
     answers: AskUserQuestionAnswerMap
   ) => void
   onExitPlanModeConfirm: (toolUseId: string, confirmed: boolean, clearContext?: boolean, message?: string) => void
+  onSetApiKey: (apiKey: string) => Promise<void>
+  onStartLogin: () => Promise<{ oauthUrl: string }>
+  onSubmitOAuthCode: (code: string) => Promise<{ success: boolean }>
+  onCheckAuthStatus: () => Promise<{ loggedIn: boolean; email?: string }>
 }
 
 export function NomiTranscript({
@@ -82,6 +88,10 @@ export function NomiTranscript({
   onOpenLocalLink,
   onAskUserQuestionSubmit,
   onExitPlanModeConfirm,
+  onSetApiKey,
+  onStartLogin,
+  onSubmitOAuthCode,
+  onCheckAuthStatus,
 }: NomiTranscriptProps) {
   const renderItems = useMemo(() => groupMessages(messages), [messages])
 
@@ -142,6 +152,18 @@ export function NomiTranscript({
         if (nextMessage?.kind === "context_cleared" || previousMessage?.kind === "context_cleared") {
           return null
         }
+        if (!message.success && message.result.includes("Not logged in")) {
+          return (
+            <LoginPrompt
+              key={message.id}
+              errorMessage={message.result}
+              onSubmitApiKey={onSetApiKey}
+              onStartLogin={onStartLogin}
+              onSubmitOAuthCode={onSubmitOAuthCode}
+              onCheckAuthStatus={onCheckAuthStatus}
+            />
+          )
+        }
         return <ResultMessage key={message.id} message={message} />
       }
       case "interrupted":
@@ -154,6 +176,8 @@ export function NomiTranscript({
         return <CompactSummaryMessage key={message.id} message={message} />
       case "status":
         return index === messages.length - 1 ? <StatusMessage key={message.id} message={message} /> : null
+      case "auth_status":
+        return <AuthStatusMessage key={message.id} message={message} />
     }
   }
 

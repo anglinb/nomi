@@ -437,6 +437,13 @@ export interface InterruptedEntry extends TranscriptEntryBase {
   kind: "interrupted"
 }
 
+export interface AuthStatusEntry extends TranscriptEntryBase {
+  kind: "auth_status"
+  isAuthenticating: boolean
+  output: string[]
+  error?: string
+}
+
 export type TranscriptEntry =
   | UserPromptEntry
   | SystemInitEntry
@@ -450,6 +457,7 @@ export type TranscriptEntry =
   | CompactSummaryEntry
   | ContextClearedEntry
   | InterruptedEntry
+  | AuthStatusEntry
 
 export interface HydratedToolCallBase<TKind extends string, TInput, TResult> {
   id: string
@@ -563,6 +571,7 @@ export type HydratedTranscriptMessage =
   | ({ kind: "compact_summary"; summary: string; id: string; messageId?: string; timestamp: string; hidden?: boolean })
   | ({ kind: "context_cleared"; id: string; messageId?: string; timestamp: string; hidden?: boolean })
   | ({ kind: "interrupted"; id: string; messageId?: string; timestamp: string; hidden?: boolean })
+  | ({ kind: "auth_status"; isAuthenticating: boolean; output: string[]; error?: string; id: string; messageId?: string; timestamp: string; hidden?: boolean })
   | ({ kind: "unknown"; json: string; id: string; messageId?: string; timestamp: string; hidden?: boolean })
   | ({ id: string; messageId?: string; hidden?: boolean } & HydratedToolCall)
 

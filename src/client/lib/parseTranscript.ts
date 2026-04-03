@@ -145,6 +145,15 @@ export function processTranscriptMessages(entries: TranscriptEntry[]): HydratedT
           kind: "interrupted",
         })
         break
+      case "auth_status":
+        messages.push({
+          ...createBaseMessage(entry),
+          kind: "auth_status",
+          isAuthenticating: entry.isAuthenticating,
+          output: entry.output,
+          error: entry.error,
+        })
+        break
       default:
         messages.push({
           ...createBaseMessage(entry),
