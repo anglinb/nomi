@@ -315,6 +315,25 @@ export function createWsRouter({
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { diff } })
           return
         }
+        case "git.branch": {
+          const project = store.getProject(command.projectId ?? store.getDefaultProjectId())
+          if (!project) {
+            throw new Error("Project not found")
+          }
+          const { execSync } = await import("child_process")
+          let branch = ""
+          try {
+            branch = execSync("git rev-parse --abbrev-ref HEAD", {
+              cwd: project.localPath,
+              encoding: "utf-8",
+              timeout: 5000,
+            }).trim()
+          } catch {
+            // Not a git repo or git not available — leave empty
+          }
+          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { branch } })
+          return
+        }
         case "terminal.create": {
           const project = store.getProject(command.projectId ?? store.getDefaultProjectId())
           if (!project) {

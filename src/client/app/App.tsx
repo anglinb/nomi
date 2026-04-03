@@ -13,6 +13,7 @@ import { DiffsPage } from "./DiffsPage"
 import { TerminalPage } from "./TerminalPage"
 import { VsCodePage } from "./VsCodePage"
 import { useNomiState } from "./useNomiState"
+import { useGitBranch } from "../hooks/useGitBranch"
 
 const VERSION_SEEN_STORAGE_KEY = "nomi:last-seen-version"
 
@@ -67,6 +68,7 @@ function NomiLayout() {
   const navigate = useNavigate()
   const params = useParams()
   const state = useNomiState(params.chatId ?? null)
+  const gitBranch = useGitBranch(state.socket, null)
   const chatSoundPreference = useChatSoundPreferencesStore((store) => store.chatSoundPreference)
   const chatSoundId = useChatSoundPreferencesStore((store) => store.chatSoundId)
   const currentVersion = SDK_CLIENT_APP.split("/")[1] ?? "unknown"
@@ -135,6 +137,7 @@ function NomiLayout() {
         onDeleteChat={(chat) => {
           void state.handleDeleteChat(chat)
         }}
+        gitBranch={gitBranch}
         updateSnapshot={state.updateSnapshot}
         onInstallUpdate={() => {
           void state.handleInstallUpdate()
