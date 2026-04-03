@@ -30,6 +30,7 @@ import { useTerminalToggleAnimation } from "./useTerminalToggleAnimation"
 import type { NomiState } from "./useNomiState"
 import { NomiTranscript } from "./NomiTranscript"
 import { useStickyChatFocus } from "./useStickyChatFocus"
+import { useGitDiff } from "../hooks/useDiffExtractor"
 
 const EMPTY_STATE_TEXT = "What are we building?"
 const EMPTY_STATE_TYPING_INTERVAL_MS = 19
@@ -137,6 +138,7 @@ export function ChatPage() {
   const shouldRenderTerminalLayout = Boolean(projectId && hasTerminals)
   const showRightSidebar = Boolean(projectId && rightSidebarLayout.isVisible)
   const shouldRenderRightSidebarLayout = Boolean(projectId)
+  const { refetch: refetchDiff } = useGitDiff(state.socket, projectId, showRightSidebar)
   const {
     isAnimating: isTerminalAnimating,
     mainPanelGroupRef,
@@ -145,6 +147,7 @@ export function ChatPage() {
     terminalVisualRef,
   } = useTerminalToggleAnimation({
     showTerminalPane,
+    showBottomPane: showTerminalPane,
     shouldRenderTerminalLayout,
     projectId,
     terminalLayout,
@@ -644,6 +647,8 @@ export function ChatPage() {
             >
               <RightSidebar
                 onClose={() => toggleRightSidebar(projectId)}
+                onRefresh={refetchDiff}
+                onSendAll={(message) => void state.handleSend(message)}
               />
             </div>
           </ResizablePanel>
