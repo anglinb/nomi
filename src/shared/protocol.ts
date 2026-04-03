@@ -90,6 +90,7 @@ export type ClientCommand =
   | { type: "git.branch"; projectId?: string }
   | { type: "vscode.start"; projectId?: string }
   | { type: "vscode.stop"; projectId?: string }
+  | { type: "auth.setApiKey"; apiKey: string }
 
 export type ClientEnvelope =
   | { v: 1; type: "subscribe"; id: string; topic: SubscriptionTopic }

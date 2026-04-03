@@ -98,6 +98,7 @@ interface AgentCoordinatorArgs {
     planMode: boolean
     sessionToken: string | null
     onToolRequest: (request: HarnessToolRequest) => Promise<unknown>
+    apiKey?: string | null
   }) => Promise<ClaudeSessionHandle>
 }
 
@@ -275,6 +276,17 @@ export function normalizeClaudeStreamMessage(message: any): TranscriptEntry[] {
     return [timestamped({ kind: "context_cleared", messageId, debugRaw })]
   }
 
+  if (message.type === "auth_status") {
+    return [timestamped({
+      kind: "auth_status",
+      messageId,
+      isAuthenticating: Boolean(message.isAuthenticating),
+      output: Array.isArray(message.output) ? message.output : [],
+      error: typeof message.error === "string" ? message.error : undefined,
+      debugRaw,
+    })]
+  }
+
   if (
     message.type === "user" &&
     message.message?.role === "user" &&
@@ -353,6 +365,7 @@ async function startClaudeSession(args: {
   planMode: boolean
   sessionToken: string | null
   onToolRequest: (request: HarnessToolRequest) => Promise<unknown>
+  apiKey?: string | null
 }): Promise<ClaudeSessionHandle> {
   const canUseTool: CanUseTool = async (toolName, input, options) => {
     if (toolName !== "AskUserQuestion" && toolName !== "ExitPlanMode") {
@@ -422,7 +435,11 @@ async function startClaudeSession(args: {
       canUseTool,
       tools: [...CLAUDE_TOOLSET],
       settingSources: ["user", "project", "local"],
-      env: (() => { const { CLAUDECODE: _, ...env } = process.env; return env })(),
+      env: (() => {
+        const { CLAUDECODE: _, ...env } = process.env
+        if (args.apiKey) env.ANTHROPIC_API_KEY = args.apiKey
+        return env
+      })(),
     },
   })
 
@@ -470,6 +487,7 @@ export class AgentCoordinator {
   private readonly generateTitle: (messageContent: string, cwd: string) => Promise<GenerateChatTitleResult>
   private readonly startClaudeSessionFn: NonNullable<AgentCoordinatorArgs["startClaudeSession"]>
   private reportBackgroundError: ((message: string) => void) | null = null
+  private apiKey: string | null = null
   readonly activeTurns = new Map<string, ActiveTurn>()
   readonly drainingStreams = new Map<string, { turn: HarnessTurn }>()
   readonly claudeSessions = new Map<string, ClaudeSessionState>()
@@ -485,6 +503,16 @@ export class AgentCoordinator {
   setBackgroundErrorReporter(report: ((message: string) => void) | null) {
     this.reportBackgroundError = report
   }
+
+  setApiKey(apiKey: string) {
+    this.apiKey = apiKey
+    // Close all existing Claude sessions so they restart with the new key
+    for (const [chatId, session] of this.claudeSessions.entries()) {
+      session.session.close()
+      this.claudeSessions.delete(chatId)
+    }
+  }
+
 
   getActiveStatuses() {
     const statuses = new Map<string, NomiStatus>()
@@ -723,6 +751,7 @@ export class AgentCoordinator {
         planMode: args.planMode,
         sessionToken: args.sessionToken,
         onToolRequest: args.onToolRequest,
+        apiKey: this.apiKey,
       })
 
       session = {

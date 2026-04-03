@@ -394,6 +394,11 @@ export function createWsRouter({
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id })
           return
         }
+        case "auth.setApiKey": {
+          agent.setApiKey(command.apiKey)
+          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { success: true } })
+          return
+        }
       }
 
       broadcastSnapshots()

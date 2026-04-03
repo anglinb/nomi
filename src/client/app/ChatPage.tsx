@@ -189,6 +189,9 @@ export function ChatPage() {
                     onOpenLocalLink={state.handleOpenLocalLink}
                     onAskUserQuestionSubmit={state.handleAskUserQuestion}
                     onExitPlanModeConfirm={state.handleExitPlanMode}
+                    onSetApiKey={async (apiKey) => {
+                      await state.socket.command({ type: "auth.setApiKey", apiKey })
+                    }}
                   />
                   {state.isProcessing ? <ProcessingMessage status={state.runtime?.status} /> : null}
                   {!state.isProcessing && state.isDraining ? (

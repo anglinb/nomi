@@ -30,6 +30,7 @@ describe("NomiTranscript", () => {
         onOpenLocalLink={() => undefined}
         onAskUserQuestionSubmit={() => undefined}
         onExitPlanModeConfirm={() => undefined}
+        onSetApiKey={async () => {}}
       />
     )
 
@@ -64,6 +65,7 @@ describe("NomiTranscript", () => {
         onOpenLocalLink={() => undefined}
         onAskUserQuestionSubmit={() => undefined}
         onExitPlanModeConfirm={() => undefined}
+        onSetApiKey={async () => {}}
       />
     )
 
@@ -111,6 +113,7 @@ describe("NomiTranscript", () => {
         onOpenLocalLink={() => undefined}
         onAskUserQuestionSubmit={() => undefined}
         onExitPlanModeConfirm={() => undefined}
+        onSetApiKey={async () => {}}
       />
     )
 
