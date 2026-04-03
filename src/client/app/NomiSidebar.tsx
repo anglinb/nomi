@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Code2, Loader2, PanelLeft, X, Menu, Plus, Settings } from "lucide-react"
+import { Code2, GitCompareArrows, Loader2, PanelLeft, X, Menu, Plus, Settings } from "lucide-react"
 import { NomiIcon } from "../components/ui/nomi-icon"
 import { useLocation, useNavigate } from "react-router-dom"
 import { APP_NAME } from "../../shared/branding"
@@ -96,7 +96,8 @@ export function NomiSidebar({
   const hasVisibleChats = activeVisibleCount > 0
   const isSettingsActive = location.pathname.startsWith("/settings")
   const isVsCodeActive = location.pathname === "/vscode"
-  const isUtilityPageActive = isSettingsActive || isVsCodeActive
+  const isDiffsActive = location.pathname === "/diffs"
+  const isUtilityPageActive = isSettingsActive || isVsCodeActive || isDiffsActive
   const isConnecting = connectionStatus === "connecting" || !ready
   const statusLabel = isConnecting ? "Connecting" : connectionStatus === "connected" ? "Connected" : "Disconnected"
   const statusDotClass = connectionStatus === "connected" ? "bg-emerald-500" : "bg-amber-500"
@@ -202,12 +203,44 @@ export function NomiSidebar({
           </div>
         </div>
 
+        {/* Tool buttons — VS Code + Diffs */}
+        <div className="flex items-center gap-1 px-[7px] pt-[7px]">
+          <button
+            type="button"
+            onClick={() => { navigate("/vscode"); onClose() }}
+            title="VS Code"
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition-colors",
+              isVsCodeActive
+                ? "bg-muted border-border text-foreground"
+                : "border-border/0 text-muted-foreground hover:bg-muted hover:border-border hover:text-foreground"
+            )}
+          >
+            <Code2 className="h-3.5 w-3.5" />
+            <span>Editor</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { navigate("/diffs"); onClose() }}
+            title="Diffs"
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition-colors",
+              isDiffsActive
+                ? "bg-muted border-border text-foreground"
+                : "border-border/0 text-muted-foreground hover:bg-muted hover:border-border hover:text-foreground"
+            )}
+          >
+            <GitCompareArrows className="h-3.5 w-3.5" />
+            <span>Diffs</span>
+          </button>
+        </div>
+
         <div
           ref={scrollContainerRef}
           className="flex-1 min-h-0 overflow-y-auto scrollbar-hide"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
-          <div className="p-[7px]">
+          <div className="p-[7px] pt-[5px]">
             {!hasVisibleChats && isConnecting ? (
               <div className="space-y-2 px-1 pt-3 animate-pulse">
                 {[0, 1, 2].map((row) => (
@@ -234,25 +267,7 @@ export function NomiSidebar({
           </div>
         </div>
 
-        <div className="border-t border-border p-2 space-y-1">
-          <button
-            type="button"
-            onClick={() => {
-              navigate("/vscode")
-              onClose()
-            }}
-            className={cn(
-              "w-full rounded-xl rounded-b-md border px-3 py-2 text-left transition-colors",
-              isVsCodeActive
-                ? "bg-muted border-border"
-                : "border-border/0 hover:bg-muted hover:border-border active:bg-muted/80"
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <Code2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">VS Code</span>
-            </div>
-          </button>
+        <div className="border-t border-border p-2">
           <button
             type="button"
             onClick={() => {
