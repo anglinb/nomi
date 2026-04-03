@@ -31,9 +31,6 @@ describe("NomiTranscript", () => {
         onAskUserQuestionSubmit={() => undefined}
         onExitPlanModeConfirm={() => undefined}
         onSetApiKey={async () => {}}
-        onStartLogin={async () => ({ oauthUrl: "" })}
-        onSubmitOAuthCode={async () => ({ success: false })}
-        onCheckAuthStatus={async () => ({ loggedIn: false })}
       />
     )
 
@@ -69,9 +66,6 @@ describe("NomiTranscript", () => {
         onAskUserQuestionSubmit={() => undefined}
         onExitPlanModeConfirm={() => undefined}
         onSetApiKey={async () => {}}
-        onStartLogin={async () => ({ oauthUrl: "" })}
-        onSubmitOAuthCode={async () => ({ success: false })}
-        onCheckAuthStatus={async () => ({ loggedIn: false })}
       />
     )
 
@@ -120,9 +114,6 @@ describe("NomiTranscript", () => {
         onAskUserQuestionSubmit={() => undefined}
         onExitPlanModeConfirm={() => undefined}
         onSetApiKey={async () => {}}
-        onStartLogin={async () => ({ oauthUrl: "" })}
-        onSubmitOAuthCode={async () => ({ success: false })}
-        onCheckAuthStatus={async () => ({ loggedIn: false })}
       />
     )
 

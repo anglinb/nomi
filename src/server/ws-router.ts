@@ -399,21 +399,6 @@ export function createWsRouter({
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { success: true } })
           return
         }
-        case "auth.startLogin": {
-          const result = await agent.startLogin()
-          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result })
-          return
-        }
-        case "auth.submitOAuthCode": {
-          const result = await agent.submitOAuthCode(command.code)
-          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result })
-          return
-        }
-        case "auth.status": {
-          const result = await agent.getAuthStatus()
-          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result })
-          return
-        }
       }
 
       broadcastSnapshots()

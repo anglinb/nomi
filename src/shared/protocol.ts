@@ -91,9 +91,6 @@ export type ClientCommand =
   | { type: "vscode.start"; projectId?: string }
   | { type: "vscode.stop"; projectId?: string }
   | { type: "auth.setApiKey"; apiKey: string }
-  | { type: "auth.startLogin" }
-  | { type: "auth.submitOAuthCode"; code: string }
-  | { type: "auth.status" }
 
 export type ClientEnvelope =
   | { v: 1; type: "subscribe"; id: string; topic: SubscriptionTopic }

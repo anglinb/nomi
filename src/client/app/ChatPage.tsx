@@ -192,15 +192,6 @@ export function ChatPage() {
                     onSetApiKey={async (apiKey) => {
                       await state.socket.command({ type: "auth.setApiKey", apiKey })
                     }}
-                    onStartLogin={async () => {
-                      return await state.socket.command<{ oauthUrl: string }>({ type: "auth.startLogin" })
-                    }}
-                    onSubmitOAuthCode={async (code) => {
-                      return await state.socket.command<{ success: boolean }>({ type: "auth.submitOAuthCode", code })
-                    }}
-                    onCheckAuthStatus={async () => {
-                      return await state.socket.command<{ loggedIn: boolean; email?: string }>({ type: "auth.status" })
-                    }}
                   />
                   {state.isProcessing ? <ProcessingMessage status={state.runtime?.status} /> : null}
                   {!state.isProcessing && state.isDraining ? (

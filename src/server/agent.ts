@@ -1,5 +1,3 @@
-import { spawn, type ChildProcess } from "node:child_process"
-import { resolve } from "node:path"
 import { query, type CanUseTool, type PermissionResult, type Query, type SDKUserMessage } from "@anthropic-ai/claude-agent-sdk"
 import type {
   AgentProvider,
@@ -490,7 +488,6 @@ export class AgentCoordinator {
   private readonly startClaudeSessionFn: NonNullable<AgentCoordinatorArgs["startClaudeSession"]>
   private reportBackgroundError: ((message: string) => void) | null = null
   private apiKey: string | null = null
-  private loginProcess: ChildProcess | null = null
   readonly activeTurns = new Map<string, ActiveTurn>()
   readonly drainingStreams = new Map<string, { turn: HarnessTurn }>()
   readonly claudeSessions = new Map<string, ClaudeSessionState>()
@@ -516,130 +513,6 @@ export class AgentCoordinator {
     }
   }
 
-  private getClaudeCliPath(): string {
-    return resolve(process.cwd(), "node_modules/@anthropic-ai/claude-agent-sdk/cli.js")
-  }
-
-  /** Spawn `claude auth login` with BROWSER=/dev/null, capture the OAuth URL.
-   *  The process stays alive waiting for the OAuth code to be submitted via submitOAuthCode(). */
-  async startLogin(): Promise<{ oauthUrl: string }> {
-    // Kill any existing login process
-    if (this.loginProcess) {
-      this.loginProcess.kill()
-      this.loginProcess = null
-    }
-
-    const cliPath = this.getClaudeCliPath()
-    return new Promise((resolve, reject) => {
-      const child = spawn("bun", [cliPath, "auth", "login"], {
-        env: { ...process.env, BROWSER: "/dev/null" },
-        stdio: ["pipe", "pipe", "pipe"],
-      })
-      this.loginProcess = child
-
-      let output = ""
-      const timeout = setTimeout(() => {
-        reject(new Error("Login timed out waiting for OAuth URL"))
-      }, 10_000)
-
-      const checkForUrl = (data: Buffer) => {
-        output += data.toString()
-        const match = output.match(/visit:\s*(https:\/\/[^\s]+)/)
-        if (match) {
-          clearTimeout(timeout)
-          resolve({ oauthUrl: match[1] })
-        }
-      }
-
-      child.stdout.on("data", checkForUrl)
-      child.stderr.on("data", checkForUrl)
-
-      child.on("close", (code) => {
-        clearTimeout(timeout)
-        this.loginProcess = null
-        if (code === 0) {
-          // Login completed — clear stale sessions so they pick up new creds
-          for (const [chatId, session] of this.claudeSessions.entries()) {
-            session.session.close()
-            this.claudeSessions.delete(chatId)
-          }
-        }
-      })
-
-      child.on("error", (err) => {
-        clearTimeout(timeout)
-        this.loginProcess = null
-        reject(err)
-      })
-    })
-  }
-
-  /** Write the OAuth code from the callback page to the waiting login process */
-  async submitOAuthCode(code: string): Promise<{ success: boolean }> {
-    if (!this.loginProcess || !this.loginProcess.stdin) {
-      throw new Error("No login in progress. Click 'Sign in with Claude' first.")
-    }
-
-    return new Promise((resolve) => {
-      const child = this.loginProcess!
-      let output = ""
-
-      const onData = (data: Buffer) => { output += data.toString() }
-      child.stdout?.on("data", onData)
-      child.stderr?.on("data", onData)
-
-      child.stdin!.write(code + "\n")
-
-      child.on("close", (exitCode) => {
-        this.loginProcess = null
-        if (exitCode === 0) {
-          for (const [chatId, session] of this.claudeSessions.entries()) {
-            session.session.close()
-            this.claudeSessions.delete(chatId)
-          }
-          resolve({ success: true })
-        } else {
-          resolve({ success: false })
-        }
-      })
-
-      // Timeout — if the process doesn't exit in 30s, something went wrong
-      setTimeout(() => {
-        if (this.loginProcess === child) {
-          child.kill()
-          this.loginProcess = null
-          resolve({ success: false })
-        }
-      }, 30_000)
-    })
-  }
-
-  /** Check current auth status via `claude auth status` */
-  async getAuthStatus(): Promise<{ loggedIn: boolean; email?: string; authMethod?: string }> {
-    const cliPath = this.getClaudeCliPath()
-    return new Promise((resolve) => {
-      const child = spawn("bun", [cliPath, "auth", "status", "--json"], {
-        env: { ...process.env },
-        stdio: ["pipe", "pipe", "pipe"],
-      })
-
-      let stdout = ""
-      child.stdout.on("data", (data: Buffer) => { stdout += data.toString() })
-      child.on("close", () => {
-        try {
-          const parsed = JSON.parse(stdout)
-          resolve({
-            loggedIn: Boolean(parsed.loggedIn),
-            email: parsed.email,
-            authMethod: parsed.authMethod,
-          })
-        } catch {
-          resolve({ loggedIn: false })
-        }
-      })
-      child.on("error", () => resolve({ loggedIn: false }))
-    })
-  }
 
   getActiveStatuses() {
     const statuses = new Map<string, NomiStatus>()

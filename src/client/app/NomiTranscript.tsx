@@ -75,9 +75,6 @@ interface NomiTranscriptProps {
   ) => void
   onExitPlanModeConfirm: (toolUseId: string, confirmed: boolean, clearContext?: boolean, message?: string) => void
   onSetApiKey: (apiKey: string) => Promise<void>
-  onStartLogin: () => Promise<{ oauthUrl: string }>
-  onSubmitOAuthCode: (code: string) => Promise<{ success: boolean }>
-  onCheckAuthStatus: () => Promise<{ loggedIn: boolean; email?: string }>
 }
 
 export function NomiTranscript({
@@ -89,9 +86,6 @@ export function NomiTranscript({
   onAskUserQuestionSubmit,
   onExitPlanModeConfirm,
   onSetApiKey,
-  onStartLogin,
-  onSubmitOAuthCode,
-  onCheckAuthStatus,
 }: NomiTranscriptProps) {
   const renderItems = useMemo(() => groupMessages(messages), [messages])
 
@@ -158,9 +152,6 @@ export function NomiTranscript({
               key={message.id}
               errorMessage={message.result}
               onSubmitApiKey={onSetApiKey}
-              onStartLogin={onStartLogin}
-              onSubmitOAuthCode={onSubmitOAuthCode}
-              onCheckAuthStatus={onCheckAuthStatus}
             />
           )
         }
