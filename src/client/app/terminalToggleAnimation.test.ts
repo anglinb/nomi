@@ -26,6 +26,7 @@ describe("terminalToggleAnimation", () => {
       previousShouldRenderTerminalLayout: false,
       previousShowTerminalPane: false,
       showTerminalPane: true,
+      showBottomPane: true,
       terminalLayout: {
         isVisible: true,
         mainSizes: [68, 32],
@@ -47,6 +48,7 @@ describe("terminalToggleAnimation", () => {
       previousShouldRenderTerminalLayout: false,
       previousShowTerminalPane: false,
       showTerminalPane: true,
+      showBottomPane: true,
       terminalLayout: {
         isVisible: true,
         mainSizes: [68, 32],
@@ -66,6 +68,7 @@ describe("terminalToggleAnimation", () => {
       previousShouldRenderTerminalLayout: true,
       previousShowTerminalPane: true,
       showTerminalPane: true,
+      showBottomPane: true,
       terminalLayout: {
         isVisible: true,
         mainSizes: [60, 40],

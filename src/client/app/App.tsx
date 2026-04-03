@@ -9,6 +9,7 @@ import { playChatNotificationSound, shouldPlayChatSound } from "../lib/chatSound
 import { NomiSidebar } from "./NomiSidebar"
 import { ChatPage } from "./ChatPage"
 import { SettingsPage } from "./SettingsPage"
+import { VsCodePage } from "./VsCodePage"
 import { useNomiState } from "./useNomiState"
 
 const VERSION_SEEN_STORAGE_KEY = "nomi:last-seen-version"
@@ -149,6 +150,7 @@ export function App() {
         <Routes>
           <Route element={<NomiLayout />}>
             <Route path="/" element={<ChatPage />} />
+            <Route path="/vscode" element={<VsCodePage />} />
             <Route path="/settings" element={<Navigate to="/settings/general" replace />} />
             <Route path="/settings/:sectionId" element={<SettingsPage />} />
             <Route path="/chat/:chatId" element={<ChatPage />} />

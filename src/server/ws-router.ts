@@ -8,6 +8,7 @@ import { openExternal } from "./external-open"
 import { KeybindingsManager } from "./keybindings"
 import { TerminalManager } from "./terminal-manager"
 import type { UpdateManager } from "./update-manager"
+import { VsCodeManager } from "./vscode-manager"
 import { deriveChatSnapshot, deriveSidebarData } from "./read-models"
 
 export interface ClientState {
@@ -20,6 +21,7 @@ interface CreateWsRouterArgs {
   terminals: TerminalManager
   keybindings: KeybindingsManager
   updateManager: UpdateManager | null
+  vsCode: VsCodeManager
 }
 
 function send(ws: ServerWebSocket<ClientState>, message: ServerEnvelope) {
@@ -32,6 +34,7 @@ export function createWsRouter({
   terminals,
   keybindings,
   updateManager,
+  vsCode,
 }: CreateWsRouterArgs) {
   const sockets = new Set<ServerWebSocket<ClientState>>()
 
@@ -92,6 +95,18 @@ export function createWsRouter({
       }
     }
 
+    if (topic.type === "vscode") {
+      return {
+        v: PROTOCOL_VERSION,
+        type: "snapshot",
+        id,
+        snapshot: {
+          type: "vscode",
+          data: vsCode.getSnapshot(topic.projectId),
+        },
+      }
+    }
+
     return {
       v: PROTOCOL_VERSION,
       type: "snapshot",
@@ -148,6 +163,15 @@ export function createWsRouter({
     }
   }
 
+  function pushVsCodeSnapshot(projectId: string) {
+    for (const ws of sockets) {
+      for (const [id, topic] of ws.data.subscriptions.entries()) {
+        if (topic.type !== "vscode" || topic.projectId !== projectId) continue
+        send(ws, createEnvelope(id, topic))
+      }
+    }
+  }
+
   const disposeTerminalEvents = terminals.onEvent((event) => {
     pushTerminalEvent(event.terminalId, event)
   })
@@ -159,6 +183,10 @@ export function createWsRouter({
         send(ws, createEnvelope(id, topic))
       }
     }
+  })
+
+  const disposeVsCodeEvents = vsCode.onChange((projectId) => {
+    pushVsCodeSnapshot(projectId)
   })
 
   const disposeUpdateEvents = updateManager?.onChange(() => {
@@ -264,6 +292,29 @@ export function createWsRouter({
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id })
           break
         }
+        case "git.diff": {
+          const project = store.getProject(command.projectId)
+          if (!project) {
+            throw new Error("Project not found")
+          }
+          const { execSync } = await import("child_process")
+          let diff = ""
+          try {
+            diff = execSync("git diff HEAD --no-ext-diff --color=never", {
+              cwd: project.localPath,
+              encoding: "utf-8",
+              maxBuffer: 10 * 1024 * 1024,
+            })
+          } catch (err) {
+            // git diff exits 1 when there are differences in some configs,
+            // but stdout still contains the diff.
+            if (err && typeof err === "object" && "stdout" in err && typeof (err as { stdout: unknown }).stdout === "string") {
+              diff = (err as { stdout: string }).stdout
+            }
+          }
+          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { diff } })
+          return
+        }
         case "terminal.create": {
           const project = store.getProject(command.projectId ?? store.getDefaultProjectId())
           if (!project) {
@@ -293,6 +344,21 @@ export function createWsRouter({
           terminals.close(command.terminalId)
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id })
           pushTerminalSnapshot(command.terminalId)
+          return
+        }
+        case "vscode.start": {
+          const project = store.getProject(command.projectId ?? store.getDefaultProjectId())
+          if (!project) {
+            throw new Error("Project not found")
+          }
+          const snapshot = await vsCode.start(project.id, project.localPath)
+          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: snapshot })
+          return
+        }
+        case "vscode.stop": {
+          const projectId = command.projectId ?? store.getDefaultProjectId()
+          vsCode.stop(projectId)
+          send(ws, { v: PROTOCOL_VERSION, type: "ack", id })
           return
         }
       }
@@ -343,6 +409,7 @@ export function createWsRouter({
     dispose() {
       agent.setBackgroundErrorReporter?.(null)
       disposeTerminalEvents()
+      disposeVsCodeEvents()
       disposeKeybindingEvents()
       disposeUpdateEvents()
     },

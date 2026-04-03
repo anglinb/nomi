@@ -38,6 +38,7 @@ describe("normalizeKeybindings", () => {
       openInFinder: ["Cmd+Alt+F"],
       openInEditor: ["Cmd+Shift+O"],
       addSplitTerminal: ["Cmd+Shift+J"],
+      toggleVsCode: ["Cmd+Shift+E"],
     }, TEST_FILE_PATH)
 
     expect(snapshot).toEqual({
@@ -47,6 +48,7 @@ describe("normalizeKeybindings", () => {
         openInFinder: ["cmd+alt+f"],
         openInEditor: ["cmd+shift+o"],
         addSplitTerminal: ["cmd+shift+j"],
+        toggleVsCode: ["cmd+shift+e"],
       },
       warning: null,
       filePathDisplay: TEST_FILE_PATH,
@@ -97,6 +99,7 @@ describe("KeybindingsManager", () => {
       openInFinder: ["Cmd+Alt+F"],
       openInEditor: ["Cmd+Shift+O"],
       addSplitTerminal: ["Cmd+Shift+J"],
+      toggleVsCode: ["Cmd+Shift+E"],
     })
 
     expect(snapshot).toEqual({
@@ -106,6 +109,7 @@ describe("KeybindingsManager", () => {
         openInFinder: ["cmd+alt+f"],
         openInEditor: ["cmd+shift+o"],
         addSplitTerminal: ["cmd+shift+j"],
+        toggleVsCode: ["cmd+shift+e"],
       },
       warning: null,
       filePathDisplay: filePath,

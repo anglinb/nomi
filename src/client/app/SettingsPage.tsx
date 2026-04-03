@@ -1037,5 +1037,6 @@ function buildKeybindingPayload(source: Record<string, string>): Record<Keybindi
     openInFinder: parseKeybindingInput(source.openInFinder ?? ""),
     openInEditor: parseKeybindingInput(source.openInEditor ?? ""),
     addSplitTerminal: parseKeybindingInput(source.addSplitTerminal ?? ""),
+    toggleVsCode: parseKeybindingInput(source.toggleVsCode ?? ""),
   }
 }

@@ -9,6 +9,7 @@ import { TerminalManager } from "./terminal-manager"
 import { UpdateManager } from "./update-manager"
 import type { UpdateInstallAttemptResult } from "./cli-runtime"
 import { createWsRouter, type ClientState } from "./ws-router"
+import { VsCodeManager } from "./vscode-manager"
 import { deleteProjectUpload, inferAttachmentContentType, persistProjectUpload } from "./uploads"
 import { getProjectUploadDir } from "./paths"
 
@@ -73,6 +74,7 @@ export async function startNomiServer(options: StartNomiServerOptions = {}) {
   let server: ReturnType<typeof Bun.serve<ClientState>>
   let router: ReturnType<typeof createWsRouter>
   const terminals = new TerminalManager()
+  const vsCode = new VsCodeManager()
   const keybindings = new KeybindingsManager()
   await keybindings.initialize()
   const updateManager = options.update
@@ -95,6 +97,7 @@ export async function startNomiServer(options: StartNomiServerOptions = {}) {
     terminals,
     keybindings,
     updateManager,
+    vsCode,
   })
 
   const distDir = path.join(import.meta.dir, "..", "..", "dist", "client")
@@ -171,6 +174,7 @@ export async function startNomiServer(options: StartNomiServerOptions = {}) {
     router.dispose()
     keybindings.dispose()
     terminals.closeAll()
+    vsCode.stopAll()
     await store.compact()
     server.stop(true)
   }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Loader2, PanelLeft, X, Menu, Plus, Settings } from "lucide-react"
+import { Code2, Loader2, PanelLeft, X, Menu, Plus, Settings } from "lucide-react"
 import { NomiIcon } from "../components/ui/nomi-icon"
 import { useLocation, useNavigate } from "react-router-dom"
 import { APP_NAME } from "../../shared/branding"
@@ -95,7 +95,8 @@ export function NomiSidebar({
 
   const hasVisibleChats = activeVisibleCount > 0
   const isSettingsActive = location.pathname.startsWith("/settings")
-  const isUtilityPageActive = isSettingsActive
+  const isVsCodeActive = location.pathname === "/vscode"
+  const isUtilityPageActive = isSettingsActive || isVsCodeActive
   const isConnecting = connectionStatus === "connecting" || !ready
   const statusLabel = isConnecting ? "Connecting" : connectionStatus === "connected" ? "Connected" : "Disconnected"
   const statusDotClass = connectionStatus === "connected" ? "bg-emerald-500" : "bg-amber-500"
@@ -233,8 +234,26 @@ export function NomiSidebar({
           </div>
         </div>
 
-        <div className="border-t border-border p-2">
-            <button
+        <div className="border-t border-border p-2 space-y-1">
+          <button
+            type="button"
+            onClick={() => {
+              navigate("/vscode")
+              onClose()
+            }}
+            className={cn(
+              "w-full rounded-xl rounded-b-md border px-3 py-2 text-left transition-colors",
+              isVsCodeActive
+                ? "bg-muted border-border"
+                : "border-border/0 hover:bg-muted hover:border-border active:bg-muted/80"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Code2 className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">VS Code</span>
+            </div>
+          </button>
+          <button
             type="button"
             onClick={() => {
               navigate("/settings/general")
@@ -247,7 +266,7 @@ export function NomiSidebar({
                 : "border-border/0 hover:bg-muted hover:border-border active:bg-muted/80"
             )}
           >
-            <div className="flex items- justify-between gap-2">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Settings</span>

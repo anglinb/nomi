@@ -22,6 +22,7 @@ const DEFAULT_KEYBINDINGS_SNAPSHOT: KeybindingsSnapshot = {
     openInFinder: ["cmd+alt+f"],
     openInEditor: ["cmd+shift+o"],
     addSplitTerminal: ["cmd+shift+j"],
+    toggleVsCode: ["cmd+shift+e", "ctrl+shift+e"],
   },
   warning: null,
   filePathDisplay: "~/.nomi/keybindings.json",
@@ -52,6 +53,7 @@ describe("ws-router", () => {
       } as never,
 
       updateManager: null,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const ws = new FakeWebSocket()
 
@@ -90,6 +92,7 @@ describe("ws-router", () => {
       } as never,
 
       updateManager: null,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const ws = new FakeWebSocket()
 
@@ -131,6 +134,7 @@ describe("ws-router", () => {
       } as never,
 
       updateManager: null,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const ws = new FakeWebSocket()
 
@@ -215,6 +219,7 @@ describe("ws-router", () => {
       } as never,
 
       updateManager: null,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const wsA = new FakeWebSocket()
     const wsB = new FakeWebSocket()
@@ -324,6 +329,7 @@ describe("ws-router", () => {
       } as never,
 
       updateManager: null,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const ws = new FakeWebSocket()
     router.handleOpen(ws as never)
@@ -363,6 +369,7 @@ describe("ws-router", () => {
       keybindings: keybindings as never,
 
       updateManager: null,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const ws = new FakeWebSocket()
 
@@ -465,6 +472,7 @@ describe("ws-router", () => {
       } as never,
 
       updateManager: updateManager as never,
+      vsCode: { getSnapshot: () => null, onChange: () => () => {} } as never,
     })
     const ws = new FakeWebSocket()
 

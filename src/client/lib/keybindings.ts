@@ -6,6 +6,7 @@ export const KEYBINDING_ACTION_LABELS: Record<KeybindingAction, string> = {
   openInFinder: "Open In Finder",
   openInEditor: "Open In Editor",
   addSplitTerminal: "Add Split Terminal",
+  toggleVsCode: "Toggle VS Code",
 }
 
 export function formatKeybindingInput(bindings: string[] | undefined) {
@@ -68,6 +69,7 @@ export function getResolvedKeybindings(snapshot: KeybindingsSnapshot | null): Ke
       openInFinder: snapshot?.bindings.openInFinder ?? DEFAULT_KEYBINDINGS.openInFinder,
       openInEditor: snapshot?.bindings.openInEditor ?? DEFAULT_KEYBINDINGS.openInEditor,
       addSplitTerminal: snapshot?.bindings.addSplitTerminal ?? DEFAULT_KEYBINDINGS.addSplitTerminal,
+      toggleVsCode: snapshot?.bindings.toggleVsCode ?? DEFAULT_KEYBINDINGS.toggleVsCode,
     },
     warning: snapshot?.warning ?? null,
     filePathDisplay: snapshot?.filePathDisplay ?? "",
