@@ -6,6 +6,7 @@ import { APP_NAME } from "../../shared/branding"
 import { Button } from "../components/ui/button"
 import { cn } from "../lib/utils"
 import { ChatRow } from "../components/chat-ui/sidebar/ChatRow"
+import { useTerminalLayoutStore } from "../stores/terminalLayoutStore"
 import type { SidebarData, SidebarChatRow, UpdateSnapshot } from "../../shared/types"
 import type { SocketStatus } from "./socket"
 
@@ -47,7 +48,20 @@ export function NomiSidebar({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
+  // Terminal state from Zustand store (client-side)
+  const terminalProjects = useTerminalLayoutStore((store) => store.projects)
+  const addTerminal = useTerminalLayoutStore((store) => store.addTerminal)
+  const removeTerminal = useTerminalLayoutStore((store) => store.removeTerminal)
+
+  // Collect all terminals across all projects
+  const allTerminals = Object.entries(terminalProjects).flatMap(([projectId, layout]) =>
+    layout.terminals.map((t) => ({ ...t, projectId }))
+  )
+
   const activeVisibleCount = data.chats.length
+  const activeTerminalId = location.pathname.startsWith("/terminal/")
+    ? location.pathname.split("/terminal/")[1]
+    : null
 
   const renderChatRow = useCallback((chat: SidebarChatRow) => (
     <ChatRow
@@ -62,6 +76,18 @@ export function NomiSidebar({
       onDeleteChat={() => onDeleteChat(chat)}
     />
   ), [activeChatId, navigate, nowMs, onClose, onDeleteChat])
+
+  const handleCreateTerminal = useCallback(() => {
+    const projectId = "default"
+    addTerminal(projectId)
+    // Get the newly created terminal's ID from the store
+    const layout = useTerminalLayoutStore.getState().projects[projectId]
+    if (layout && layout.terminals.length > 0) {
+      const newTerminal = layout.terminals[layout.terminals.length - 1]
+      navigate(`/terminal/${newTerminal.id}`)
+      onClose()
+    }
+  }, [addTerminal, navigate, onClose])
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -97,8 +123,8 @@ export function NomiSidebar({
   const isSettingsActive = location.pathname.startsWith("/settings")
   const isVsCodeActive = location.pathname === "/vscode"
   const isDiffsActive = location.pathname === "/diffs"
-  const isTerminalActive = location.pathname === "/terminal"
-  const isUtilityPageActive = isSettingsActive || isVsCodeActive || isDiffsActive || isTerminalActive
+  const isTerminalRoute = location.pathname.startsWith("/terminal")
+  const isUtilityPageActive = isSettingsActive || isVsCodeActive || isDiffsActive || isTerminalRoute
   const isConnecting = connectionStatus === "connecting" || !ready
   const statusLabel = isConnecting ? "Connecting" : connectionStatus === "connected" ? "Connected" : "Disconnected"
   const statusDotClass = connectionStatus === "connected" ? "bg-emerald-500" : "bg-amber-500"
@@ -204,7 +230,7 @@ export function NomiSidebar({
           </div>
         </div>
 
-        {/* Tool buttons — Editor, Terminal, Diffs */}
+        {/* Tool buttons — Editor + Diffs */}
         <div className="flex items-center gap-1 px-[7px] pt-[7px]">
           <button
             type="button"
@@ -219,20 +245,6 @@ export function NomiSidebar({
           >
             <Code2 className="h-3.5 w-3.5" />
             <span>Editor</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => { navigate("/terminal"); onClose() }}
-            title="Terminal"
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition-colors",
-              isTerminalActive
-                ? "bg-muted border-border text-foreground"
-                : "border-border/0 text-muted-foreground hover:bg-muted hover:border-border hover:text-foreground"
-            )}
-          >
-            <Terminal className="h-3.5 w-3.5" />
-            <span>Terminal</span>
           </button>
           <button
             type="button"
@@ -279,6 +291,58 @@ export function NomiSidebar({
             <div className="space-y-[2px]">
               {data.chats.map(renderChatRow)}
             </div>
+
+            {/* Terminals section */}
+            {allTerminals.length > 0 || hasVisibleChats ? (
+              <div className="mt-3">
+                <div className="flex items-center justify-between px-2.5 pb-1">
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Terminals</span>
+                  <button
+                    type="button"
+                    onClick={handleCreateTerminal}
+                    className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="New terminal"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="space-y-[2px]">
+                  {allTerminals.map((terminal) => (
+                    <div
+                      key={terminal.id}
+                      data-terminal-id={terminal.id}
+                      className={cn(
+                        "group/row flex items-center gap-2 rounded-lg border px-2.5 pr-1 py-1.5 transition-all cursor-pointer",
+                        activeTerminalId === terminal.id
+                          ? "bg-muted border-border"
+                          : "border-border/0 hover:bg-muted/50 hover:border-border"
+                      )}
+                      onClick={() => {
+                        navigate(`/terminal/${terminal.id}`)
+                        onClose()
+                      }}
+                    >
+                      <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="flex-1 min-w-0 truncate text-sm">{terminal.title}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removeTerminal(terminal.projectId, terminal.id)
+                          if (activeTerminalId === terminal.id) {
+                            navigate("/")
+                          }
+                        }}
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 group-hover/row:opacity-100 hover:bg-accent hover:text-foreground transition-all"
+                        title="Close terminal"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
 
