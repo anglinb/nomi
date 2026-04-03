@@ -21,6 +21,7 @@ export type SubscriptionTopic =
   | { type: "keybindings" }
   | { type: "chat"; chatId: string }
   | { type: "terminal"; terminalId: string }
+  | { type: "vscode"; projectId: string }
 
 export interface TerminalSnapshot {
   terminalId: string
@@ -39,6 +40,14 @@ export interface TerminalSnapshot {
 export type TerminalEvent =
   | { type: "terminal.output"; terminalId: string; data: string }
   | { type: "terminal.exit"; terminalId: string; exitCode: number; signal?: number }
+
+export interface VsCodeSnapshot {
+  projectId: string
+  status: "starting" | "running" | "error" | "stopped"
+  port: number | null
+  cwd: string | null
+  error: string | null
+}
 
 export type ClientCommand =
   | { type: "system.ping" }
@@ -77,6 +86,9 @@ export type ClientCommand =
   | { type: "terminal.input"; terminalId: string; data: string }
   | { type: "terminal.resize"; terminalId: string; cols: number; rows: number }
   | { type: "terminal.close"; terminalId: string }
+  | { type: "git.diff"; projectId: string }
+  | { type: "vscode.start"; projectId?: string }
+  | { type: "vscode.stop"; projectId?: string }
 
 export type ClientEnvelope =
   | { v: 1; type: "subscribe"; id: string; topic: SubscriptionTopic }
@@ -89,6 +101,7 @@ export type ServerSnapshot =
   | { type: "keybindings"; data: KeybindingsSnapshot }
   | { type: "chat"; data: ChatSnapshot | null }
   | { type: "terminal"; data: TerminalSnapshot | null }
+  | { type: "vscode"; data: VsCodeSnapshot | null }
 
 export type ServerEnvelope =
   | { v: 1; type: "snapshot"; id: string; snapshot: ServerSnapshot }

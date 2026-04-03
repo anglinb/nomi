@@ -241,6 +241,7 @@ export type KeybindingAction =
   | "openInFinder"
   | "openInEditor"
   | "addSplitTerminal"
+  | "toggleVsCode"
 
 export const DEFAULT_KEYBINDINGS: Record<KeybindingAction, string[]> = {
   toggleEmbeddedTerminal: ["cmd+j", "ctrl+`"],
@@ -248,6 +249,7 @@ export const DEFAULT_KEYBINDINGS: Record<KeybindingAction, string[]> = {
   openInFinder: ["cmd+alt+f", "ctrl+alt+f"],
   openInEditor: ["cmd+shift+o", "ctrl+shift+o"],
   addSplitTerminal: ["cmd+/", "ctrl+/"],
+  toggleVsCode: ["cmd+shift+e", "ctrl+shift+e"],
 }
 
 export interface KeybindingsSnapshot {

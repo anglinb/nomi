@@ -8,6 +8,7 @@ type UseTerminalToggleAnimationParams = {
   projectId: string | null
   shouldRenderTerminalLayout: boolean
   showTerminalPane: boolean
+  showBottomPane: boolean
   terminalLayout: ProjectTerminalLayout
 }
 
@@ -25,6 +26,7 @@ type ResolveTerminalAnimationStateArgs = {
   previousShouldRenderTerminalLayout: boolean
   previousShowTerminalPane: boolean
   showTerminalPane: boolean
+  showBottomPane: boolean
   terminalLayout: ProjectTerminalLayout
   liveLayout: [number, number]
 }
@@ -53,14 +55,16 @@ export function resolveTerminalAnimationState({
   previousShouldRenderTerminalLayout,
   previousShowTerminalPane,
   showTerminalPane,
+  showBottomPane,
   terminalLayout,
   liveLayout,
 }: ResolveTerminalAnimationStateArgs): ResolvedTerminalAnimationState {
   const didProjectChange = previousProjectId !== null && previousProjectId !== projectId
-  const isInitialOpen = showTerminalPane && !previousShowTerminalPane
+  // Use showBottomPane (terminal OR vscode) for determining if the panel should be open
+  const isInitialOpen = showBottomPane && !previousShowTerminalPane
   const isInitialRender = !previousShouldRenderTerminalLayout
   const isInitialProjectRender = previousProjectId === null && projectId !== null
-  const targetLayout: [number, number] = showTerminalPane ? terminalLayout.mainSizes : [100, 0]
+  const targetLayout: [number, number] = showBottomPane ? terminalLayout.mainSizes : [100, 0]
   const currentLayout: [number, number] = isInitialOpen || isInitialRender ? [100, 0] : liveLayout
 
   return {
@@ -75,6 +79,7 @@ export function useTerminalToggleAnimation({
   projectId,
   shouldRenderTerminalLayout,
   showTerminalPane,
+  showBottomPane,
   terminalLayout,
 }: UseTerminalToggleAnimationParams): UseTerminalToggleAnimationResult {
   const mainPanelGroupRef = useRef<GroupImperativeHandle | null>(null)
@@ -154,6 +159,7 @@ export function useTerminalToggleAnimation({
       previousShouldRenderTerminalLayout: previousShouldRenderTerminalLayoutRef.current,
       previousShowTerminalPane: previousShowTerminalPaneRef.current,
       showTerminalPane,
+      showBottomPane,
       terminalLayout,
       liveLayout: [
         group.getLayout().chat ?? terminalLayout.mainSizes[0],
@@ -162,7 +168,7 @@ export function useTerminalToggleAnimation({
     })
 
     previousShouldRenderTerminalLayoutRef.current = shouldRenderTerminalLayout
-    previousShowTerminalPaneRef.current = showTerminalPane
+    previousShowTerminalPaneRef.current = showBottomPane
 
     if (
       shouldSkipAnimation ||
@@ -170,15 +176,15 @@ export function useTerminalToggleAnimation({
       Math.abs(currentLayout[1] - targetLayout[1]) < 0.1
     ) {
       group.setLayout({ chat: targetLayout[0], terminal: targetLayout[1] })
-      terminalPanelRef.current?.setAttribute("data-terminal-open", showTerminalPane ? "true" : "false")
-      terminalVisualRef.current?.setAttribute("data-terminal-open", showTerminalPane ? "true" : "false")
+      terminalPanelRef.current?.setAttribute("data-terminal-open", showBottomPane ? "true" : "false")
+      terminalVisualRef.current?.setAttribute("data-terminal-open", showBottomPane ? "true" : "false")
       terminalVisualRef.current?.setAttribute("data-terminal-animated", "false")
       return
     }
 
     isAnimatingRef.current = true
-    terminalPanelRef.current?.setAttribute("data-terminal-open", showTerminalPane ? "true" : "false")
-    terminalVisualRef.current?.setAttribute("data-terminal-open", showTerminalPane ? "true" : "false")
+    terminalPanelRef.current?.setAttribute("data-terminal-open", showBottomPane ? "true" : "false")
+    terminalVisualRef.current?.setAttribute("data-terminal-open", showBottomPane ? "true" : "false")
     terminalVisualRef.current?.setAttribute("data-terminal-animated", "true")
     group.setLayout({ chat: currentLayout[0], terminal: currentLayout[1] })
     const startTime = performance.now()
@@ -202,7 +208,7 @@ export function useTerminalToggleAnimation({
     }
 
     animationFrameRef.current = window.requestAnimationFrame(step)
-  }, [projectId, shouldRenderTerminalLayout, showTerminalPane, terminalLayout.mainSizes])
+  }, [projectId, shouldRenderTerminalLayout, showBottomPane, terminalLayout.mainSizes])
 
   useEffect(() => {
     if (shouldRenderTerminalLayout) return

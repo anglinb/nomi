@@ -159,6 +159,7 @@ function createDefaultSnapshot(filePath: string, warning: string | null = null):
       openInFinder: [...DEFAULT_KEYBINDINGS.openInFinder],
       openInEditor: [...DEFAULT_KEYBINDINGS.openInEditor],
       addSplitTerminal: [...DEFAULT_KEYBINDINGS.addSplitTerminal],
+      toggleVsCode: [...DEFAULT_KEYBINDINGS.toggleVsCode],
     },
     warning,
     filePathDisplay: formatDisplayPath(filePath),
