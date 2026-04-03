@@ -42,6 +42,10 @@ export default defineConfig({
         target: `ws://${backendTargetHost}:${backendPort}`,
         ws: true,
       },
+      "/vscode": {
+        target: `http://${backendTargetHost}:${backendPort}`,
+        ws: true,
+      },
       "/api": {
         target: `http://${backendTargetHost}:${backendPort}`,
       },
