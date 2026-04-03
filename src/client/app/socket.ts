@@ -24,7 +24,7 @@ interface SubscriptionEntry<TSnapshot, TEvent = never> {
   eventListener?: EventListener<TEvent>
 }
 
-export class KannaSocket {
+export class NomiSocket {
   private readonly url: string
   private ws: WebSocket | null = null
   private started = false

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from
 import {
   BookText,
   Command,
-  Code,
   Info,
   Loader2,
   Menu,
@@ -24,7 +23,6 @@ import { ChatPreferenceControls } from "../components/chat-ui/ChatPreferenceCont
 import { buttonVariants } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { SettingsHeaderButton } from "../components/ui/settings-header-button"
-import type { EditorPreset } from "../../shared/protocol"
 import { SegmentedControl } from "../components/ui/segmented-control"
 import {
   Select,
@@ -49,7 +47,7 @@ import {
 } from "../stores/terminalPreferencesStore"
 import { useChatPreferencesStore } from "../stores/chatPreferencesStore"
 import { CHAT_SOUND_OPTIONS, useChatSoundPreferencesStore, type ChatSoundId, type ChatSoundPreference } from "../stores/chatSoundPreferencesStore"
-import type { KannaState } from "./useKannaState"
+import type { NomiState } from "./useNomiState"
 
 const sidebarItems = [
   {
@@ -92,13 +90,6 @@ const themeOptions = [
   { value: "system" as ThemePreference, label: "System", icon: Monitor },
 ]
 
-const editorOptions: { value: EditorPreset; label: string }[] = [
-  { value: "cursor", label: "Cursor" },
-  { value: "vscode", label: "VS Code" },
-  { value: "windsurf", label: "Windsurf" },
-  { value: "custom", label: "Custom" },
-]
-
 const chatSoundPreferenceOptions: { value: ChatSoundPreference; label: string }[] = [
   { value: "never", label: "Never" },
   { value: "unfocused", label: "When Unfocused" },
@@ -110,7 +101,7 @@ const transcriptTocOptions: { value: "enabled" | "disabled"; label: string }[] =
   { value: "disabled", label: "Disabled" },
 ]
 
-const GITHUB_RELEASES_URL = "https://api.github.com/repos/jakemor/kanna/releases"
+const GITHUB_RELEASES_URL = "https://api.github.com/repos/jakemor/nomi/releases"
 const CHANGELOG_CACHE_TTL_MS = 5 * 60 * 1000
 
 type GithubRelease = {
@@ -392,24 +383,18 @@ function SettingsRow({
 export function SettingsPage() {
   const navigate = useNavigate()
   const { sectionId } = useParams<{ sectionId: string }>()
-  const state = useOutletContext<KannaState>()
+  const state = useOutletContext<NomiState>()
   const { theme, setTheme } = useTheme()
   const [changelogStatus, setChangelogStatus] = useState<ChangelogStatus>("idle")
   const [releases, setReleases] = useState<GithubRelease[]>([])
   const [changelogError, setChangelogError] = useState<string | null>(null)
   const selectedPage = resolveSettingsSectionId(sectionId) ?? "general"
-  const isConnecting = state.connectionStatus === "connecting" || !state.localProjectsReady
-  const machineName = state.localProjects?.machine.displayName ?? "Unavailable"
-  const projectCount = state.localProjects?.projects.length ?? 0
+  const isConnecting = state.connectionStatus === "connecting" || !state.sidebarReady
   const appVersion = SDK_CLIENT_APP.split("/")[1] ?? "unknown"
   const scrollbackLines = useTerminalPreferencesStore((store) => store.scrollbackLines)
   const minColumnWidth = useTerminalPreferencesStore((store) => store.minColumnWidth)
-  const editorPreset = useTerminalPreferencesStore((store) => store.editorPreset)
-  const editorCommandTemplate = useTerminalPreferencesStore((store) => store.editorCommandTemplate)
   const setScrollbackLines = useTerminalPreferencesStore((store) => store.setScrollbackLines)
   const setMinColumnWidth = useTerminalPreferencesStore((store) => store.setMinColumnWidth)
-  const setEditorPreset = useTerminalPreferencesStore((store) => store.setEditorPreset)
-  const setEditorCommandTemplate = useTerminalPreferencesStore((store) => store.setEditorCommandTemplate)
   const chatSoundPreference = useChatSoundPreferencesStore((store) => store.chatSoundPreference)
   const chatSoundId = useChatSoundPreferencesStore((store) => store.chatSoundId)
   const setChatSoundPreference = useChatSoundPreferencesStore((store) => store.setChatSoundPreference)
@@ -427,7 +412,6 @@ export function SettingsPage() {
   const keybindingsFilePathDisplay = resolvedKeybindings.filePathDisplay || getKeybindingsFilePathDisplay()
   const [scrollbackDraft, setScrollbackDraft] = useState(String(scrollbackLines))
   const [minColumnWidthDraft, setMinColumnWidthDraft] = useState(String(minColumnWidth))
-  const [editorCommandDraft, setEditorCommandDraft] = useState(editorCommandTemplate)
   const [keybindingDrafts, setKeybindingDrafts] = useState<Record<string, string>>({})
   const [keybindingsError, setKeybindingsError] = useState<string | null>(null)
   const updateSnapshot = state.updateSnapshot
@@ -437,7 +421,7 @@ export function SettingsPage() {
     : updateSnapshot?.status === "updating"
       ? "Installing update…"
       : updateSnapshot?.status === "restart_pending"
-        ? "Restarting Kanna…"
+        ? "Restarting Nomi…"
         : updateSnapshot?.status === "available"
           ? `Update available${updateSnapshot.latestVersion ? `: ${updateSnapshot.latestVersion}` : ""}`
           : updateSnapshot?.status === "up_to_date"
@@ -453,10 +437,6 @@ export function SettingsPage() {
   useEffect(() => {
     setMinColumnWidthDraft(String(minColumnWidth))
   }, [minColumnWidth])
-
-  useEffect(() => {
-    setEditorCommandDraft(editorCommandTemplate)
-  }, [editorCommandTemplate])
 
   useEffect(() => {
     setKeybindingDrafts(Object.fromEntries(
@@ -527,10 +507,6 @@ export function SettingsPage() {
     event.currentTarget.blur()
   }
 
-  function commitEditorCommand() {
-    setEditorCommandTemplate(editorCommandDraft)
-  }
-
   function handleChatSoundPreferenceChange(nextValue: ChatSoundPreference) {
     if (!shouldPreviewChatSoundChange(chatSoundPreference, nextValue)) {
       return
@@ -595,10 +571,6 @@ export function SettingsPage() {
       })
   }
 
-  const customEditorPreview = editorCommandDraft
-    .replaceAll("{path}", "/Users/jake/Projects/kanna/src/client/app/App.tsx")
-    .replaceAll("{line}", "12")
-    .replaceAll("{column}", "1")
   const selectedSection = sidebarItems.find((item) => item.id === selectedPage) ?? sidebarItems[0]
   const selectedSectionSubtitle =
     selectedPage === "keybindings"
@@ -684,16 +656,6 @@ export function SettingsPage() {
                     <div className="text-lg font-semibold tracking-[-0.2px] text-foreground">
                       {selectedSection.label}
                     </div>
-                    {selectedPage === "keybindings" ? (
-                      <SettingsHeaderButton
-                        onClick={() => {
-                          void state.handleOpenExternalPath("open_editor", keybindingsFilePathDisplay)
-                        }}
-                        icon={<Code className="h-4 w-4" />}
-                      >
-                        Open in {state.editorLabel}
-                      </SettingsHeaderButton>
-                    ) : null}
                     {selectedPage === "general" ? (
                       <div className="flex items-center gap-2">
                         <SettingsHeaderButton
@@ -822,56 +784,6 @@ export function SettingsPage() {
                           size="sm"
                         />
                       </SettingsRow>
-
-                      <SettingsRow
-                        title="Default Editor"
-                        description="Used by the navbar code button and local file links in chat"
-                        alignStart
-                      >
-                        <Select
-                          value={editorPreset}
-                          onValueChange={(value) => setEditorPreset(value as EditorPreset)}
-                        >
-                          <SelectTrigger className="min-w-[180px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {editorOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </SettingsRow>
-
-                      {editorPreset === "custom" ? (
-                        <div className="border-t border-border">
-                          <div className="flex justify-between gap-8 py-5 pl-6">
-                            <div className="min-w-0 max-w-xl">
-                              <div className="text-sm font-medium text-foreground">Command Template</div>
-                              <div className="mt-1 text-[13px] text-muted-foreground">
-                                Include {"{path}"} and optionally {"{line}"} and {"{column}"} in your command.
-                              </div>
-                            </div>
-                            <div className="flex min-w-0 max-w-[420px] flex-1 flex-col items-stretch gap-2">
-                              <Input
-                                type="text"
-                                value={editorCommandDraft}
-                                onChange={(event) => setEditorCommandDraft(event.target.value)}
-                                onBlur={commitEditorCommand}
-                                onKeyDown={(event) => handleTextInputKeyDown(event, commitEditorCommand)}
-                                className="font-mono"
-                              />
-                              <div className="text-xs text-muted-foreground">
-                                Preview: <span className="font-mono">{customEditorPreview}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
 
                       <SettingsRow
                         title="Terminal Scrollback"
@@ -1101,18 +1013,10 @@ export function SettingsPage() {
       {showFooter ? (
         <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="px-6 py-[14.25px]">
-            <div className="grid gap-3 text-xs text-muted-foreground grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 text-xs text-muted-foreground grid-cols-2 lg:grid-cols-3">
               <div>
-                <div className="mb-1 uppercase tracking-wide text-[11px] text-muted-foreground/80">Machine</div>
-                <div className="text-foreground/80">{machineName}</div>
-              </div>
-              <div className="hidden md:block">
                 <div className="mb-1 uppercase tracking-wide text-[11px] text-muted-foreground/80">Connection</div>
                 <div className="text-foreground/80">{state.connectionStatus}</div>
-              </div>
-              <div className="hidden md:block">
-                <div className="mb-1 uppercase tracking-wide text-[11px] text-muted-foreground/80">Projects Indexed</div>
-                <div className="text-foreground/80">{projectCount}</div>
               </div>
               <div>
                 <div className="mb-1 uppercase tracking-wide text-[11px] text-muted-foreground/80">App Version</div>

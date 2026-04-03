@@ -185,7 +185,7 @@ export class UpdateManager {
         action: "restart",
         errorCode: "install_failed",
         userTitle: "Update failed",
-        userMessage: "Kanna could not determine which version to install.",
+        userMessage: "Nomi could not determine which version to install.",
       }
     }
 

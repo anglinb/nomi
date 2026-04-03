@@ -6,23 +6,20 @@ import { APP_NAME, SDK_CLIENT_APP } from "../../shared/branding"
 import type { SidebarData } from "../../shared/types"
 import { useChatSoundPreferencesStore } from "../stores/chatSoundPreferencesStore"
 import { playChatNotificationSound, shouldPlayChatSound } from "../lib/chatSounds"
-import { KannaSidebar } from "./KannaSidebar"
+import { NomiSidebar } from "./NomiSidebar"
 import { ChatPage } from "./ChatPage"
-import { LocalProjectsPage } from "./LocalProjectsPage"
 import { SettingsPage } from "./SettingsPage"
-import { useKannaState } from "./useKannaState"
+import { useNomiState } from "./useNomiState"
 
-const VERSION_SEEN_STORAGE_KEY = "kanna:last-seen-version"
+const VERSION_SEEN_STORAGE_KEY = "nomi:last-seen-version"
 
 export function shouldRedirectToChangelog(pathname: string, currentVersion: string, seenVersion: string | null) {
   return pathname === "/" && Boolean(currentVersion) && seenVersion !== currentVersion
 }
 
 export function getNotificationTitleCount(sidebarData: SidebarData) {
-  return sidebarData.projectGroups.reduce((count, group) => (
-    count + group.chats.reduce((chatCount, chat) => (
-      chatCount + (chat.unread ? 1 : 0) + (chat.status === "waiting_for_user" ? 1 : 0)
-    ), 0)
+  return sidebarData.chats.reduce((count, chat) => (
+    count + (chat.unread ? 1 : 0) + (chat.status === "waiting_for_user" ? 1 : 0)
   ), 0)
 }
 
@@ -35,12 +32,10 @@ export function getChatNotificationSnapshot(sidebarData: SidebarData): ChatNotif
   let unreadCount = 0
   const waitingChatIds = new Set<string>()
 
-  for (const group of sidebarData.projectGroups) {
-    for (const chat of group.chats) {
-      if (chat.unread) unreadCount += 1
-      if (chat.status === "waiting_for_user") {
-        waitingChatIds.add(chat.chatId)
-      }
+  for (const chat of sidebarData.chats) {
+    if (chat.unread) unreadCount += 1
+    if (chat.status === "waiting_for_user") {
+      waitingChatIds.add(chat.chatId)
     }
   }
 
@@ -64,14 +59,13 @@ export function getChatSoundBurstCount(previous: SidebarData | null, next: Sideb
   return unreadIncrease + newWaitingChats
 }
 
-function KannaLayout() {
+function NomiLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const params = useParams()
-  const state = useKannaState(params.chatId ?? null)
+  const state = useNomiState(params.chatId ?? null)
   const chatSoundPreference = useChatSoundPreferencesStore((store) => store.chatSoundPreference)
   const chatSoundId = useChatSoundPreferencesStore((store) => store.chatSoundId)
-  const showMobileOpenButton = location.pathname === "/"
   const currentVersion = SDK_CLIENT_APP.split("/")[1] ?? "unknown"
   const previousSidebarDataRef = useRef<SidebarData | null>(null)
 
@@ -121,34 +115,23 @@ function KannaLayout() {
 
   return (
     <div className="flex h-[100dvh] min-h-[100dvh] overflow-hidden">
-      <KannaSidebar
+      <NomiSidebar
         data={state.sidebarData}
         activeChatId={state.activeChatId}
         connectionStatus={state.connectionStatus}
         ready={state.sidebarReady}
         open={state.sidebarOpen}
         collapsed={state.sidebarCollapsed}
-        showMobileOpenButton={showMobileOpenButton}
         onOpen={state.openSidebar}
         onClose={state.closeSidebar}
         onCollapse={state.collapseSidebar}
         onExpand={state.expandSidebar}
-        onCreateChat={(projectId) => {
-          void state.handleCreateChat(projectId)
+        onCreateChat={() => {
+          void state.handleCreateChat()
         }}
         onDeleteChat={(chat) => {
           void state.handleDeleteChat(chat)
         }}
-        onCopyPath={(localPath) => {
-          void state.handleCopyPath(localPath)
-        }}
-        onOpenExternalPath={(action, localPath) => {
-          void state.handleOpenExternalPath(action, localPath)
-        }}
-        onRemoveProject={(projectId) => {
-          void state.handleRemoveProject(projectId)
-        }}
-        editorLabel={state.editorLabel}
         updateSnapshot={state.updateSnapshot}
         onInstallUpdate={() => {
           void state.handleInstallUpdate()
@@ -164,8 +147,8 @@ export function App() {
     <TooltipProvider>
       <AppDialogProvider>
         <Routes>
-          <Route element={<KannaLayout />}>
-            <Route path="/" element={<LocalProjectsPage />} />
+          <Route element={<NomiLayout />}>
+            <Route path="/" element={<ChatPage />} />
             <Route path="/settings" element={<Navigate to="/settings/general" replace />} />
             <Route path="/settings/:sectionId" element={<SettingsPage />} />
             <Route path="/chat/:chatId" element={<ChatPage />} />

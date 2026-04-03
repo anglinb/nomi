@@ -1,0 +1,64 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - button "Collapse sidebar" [ref=e7] [cursor=pointer]:
+          - img [ref=e8]
+        - generic [ref=e15]: Kanna
+      - generic [ref=e16]:
+        - generic "Development build" [ref=e17]: DEV
+        - button "New chat" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+    - generic [ref=e22]:
+      - generic [ref=e23] [cursor=pointer]:
+        - generic [ref=e24]: New Chat
+        - generic [ref=e25]:
+          - generic [ref=e26]: 1d
+          - button "Delete chat" [ref=e27]:
+            - img [ref=e28]
+      - generic [ref=e31] [cursor=pointer]:
+        - generic [ref=e32]: New Chat
+        - button "Delete chat" [ref=e34]:
+          - img [ref=e35]
+    - button "Settings Connected" [ref=e39] [cursor=pointer]:
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - img [ref=e42]
+          - generic [ref=e45]: Settings
+        - generic [ref=e47]: Connected
+  - generic [ref=e50]:
+    - generic [ref=e51]:
+      - button "Compose" [ref=e55] [cursor=pointer]:
+        - img [ref=e56]
+      - generic:
+        - generic:
+          - generic:
+            - img
+            - generic "What are we building?":
+              - generic:
+                - generic:
+                  - generic: What are we building?
+      - generic:
+        - button:
+          - img
+    - generic [ref=e63]:
+      - generic [ref=e66]:
+        - textbox "Build something..." [active] [ref=e67]
+        - button [disabled]:
+          - img
+      - generic [ref=e70]:
+        - button "Claude" [ref=e71] [cursor=pointer]:
+          - img [ref=e72]
+          - generic [ref=e74]: Claude
+        - button "Opus" [ref=e75] [cursor=pointer]:
+          - img [ref=e76]
+          - generic [ref=e79]: Opus
+        - button "High" [ref=e80] [cursor=pointer]:
+          - img [ref=e81]
+          - generic [ref=e89]: High
+        - button "200k" [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+          - generic [ref=e93]: 200k
+        - button "Full Access" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+          - generic [ref=e98]: Full Access

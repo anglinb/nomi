@@ -171,7 +171,7 @@ export function resolveClaudeApiModelId(modelId: string, contextWindow?: ClaudeC
   return contextWindow === "1m" ? `${modelId}[1m]` : modelId
 }
 
-export type KannaStatus =
+export type NomiStatus =
   | "idle"
   | "starting"
   | "running"
@@ -191,7 +191,7 @@ export interface SidebarChatRow {
   _creationTime: number
   chatId: string
   title: string
-  status: KannaStatus
+  status: NomiStatus
   unread: boolean
   localPath: string
   provider: AgentProvider | null
@@ -199,30 +199,8 @@ export interface SidebarChatRow {
   hasAutomation: boolean
 }
 
-export interface SidebarProjectGroup {
-  groupKey: string
-  localPath: string
-  chats: SidebarChatRow[]
-}
-
 export interface SidebarData {
-  projectGroups: SidebarProjectGroup[]
-}
-
-export interface LocalProjectSummary {
-  localPath: string
-  title: string
-  source: "saved" | "discovered"
-  lastOpenedAt?: number
-  chatCount: number
-}
-
-export interface LocalProjectsSnapshot {
-  machine: {
-    id: "local"
-    displayName: string
-  }
-  projects: LocalProjectSummary[]
+  chats: SidebarChatRow[]
 }
 
 export type UpdateStatus =
@@ -591,7 +569,7 @@ export interface ChatRuntime {
   projectId: string
   localPath: string
   title: string
-  status: KannaStatus
+  status: NomiStatus
   isDraining: boolean
   provider: AgentProvider | null
   planMode: boolean
@@ -604,7 +582,7 @@ export interface ChatSnapshot {
   availableProviders: ProviderCatalogEntry[]
 }
 
-export interface KannaSnapshot {
+export interface NomiSnapshot {
   sidebar: SidebarData
   chat?: ChatSnapshot | null
 }

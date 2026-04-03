@@ -58,7 +58,7 @@ describe("startShareTunnel", () => {
         return {
           once(event, listener) {
             if (event === "url") {
-              queueMicrotask(() => (listener as (url: string) => void)("https://kanna.trycloudflare.com"))
+              queueMicrotask(() => (listener as (url: string) => void)("https://nomi.trycloudflare.com"))
             }
             return this
           },
@@ -75,7 +75,7 @@ describe("startShareTunnel", () => {
 
     expect(installCalls).toEqual(["/tmp/cloudflared"])
     expect(quickTunnelUrls).toEqual(["http://localhost:3333"])
-    expect(shareTunnel.publicUrl).toBe("https://kanna.trycloudflare.com")
+    expect(shareTunnel.publicUrl).toBe("https://nomi.trycloudflare.com")
     shareTunnel.stop()
     expect(stopCalls).toBe(1)
   })
@@ -89,17 +89,17 @@ describe("logShareDetails", () => {
       (message) => {
         logLines.push(message)
       },
-      "https://kanna.trycloudflare.com",
+      "https://nomi.trycloudflare.com",
       "http://localhost:3333",
       async (url) => `[qr:${url}]\n`,
     )
 
     expect(logLines).toEqual([
       "QR Code:",
-      "[qr:https://kanna.trycloudflare.com]",
+      "[qr:https://nomi.trycloudflare.com]",
       "",
       "Public URL:",
-      "https://kanna.trycloudflare.com",
+      "https://nomi.trycloudflare.com",
       "",
       "Local URL:",
       "http://localhost:3333",

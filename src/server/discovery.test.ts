@@ -12,7 +12,7 @@ import {
 const tempDirs: string[] = []
 
 function makeTempDir() {
-  const directory = mkdtempSync(path.join(tmpdir(), "kanna-discovery-"))
+  const directory = mkdtempSync(path.join(tmpdir(), "nomi-discovery-"))
   tempDirs.push(directory)
   return directory
 }
@@ -53,7 +53,7 @@ describe("project discovery", () => {
   test("Codex adapter reads cwd from session metadata and ignores stale or invalid entries", () => {
     const homeDir = makeTempDir()
     const sessionsDir = path.join(homeDir, ".codex", "sessions", "2026", "03", "16")
-    const liveProjectDir = path.join(homeDir, "workspace", "kanna")
+    const liveProjectDir = path.join(homeDir, "workspace", "nomi")
     const missingProjectDir = path.join(homeDir, "workspace", "missing-project")
     mkdirSync(liveProjectDir, { recursive: true })
     mkdirSync(sessionsDir, { recursive: true })
@@ -112,7 +112,7 @@ describe("project discovery", () => {
       {
         provider: "codex",
         localPath: liveProjectDir,
-        title: "kanna",
+        title: "nomi",
         modifiedAt: Date.parse("2026-03-16T23:05:58.940134Z"),
       },
     ])

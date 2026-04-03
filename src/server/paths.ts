@@ -27,5 +27,5 @@ export async function ensureProjectDirectory(localPath: string) {
 }
 
 export function getProjectUploadDir(localPath: string) {
-  return path.join(resolveLocalPath(localPath), ".kanna", "uploads")
+  return path.join(resolveLocalPath(localPath), ".nomi", "uploads")
 }

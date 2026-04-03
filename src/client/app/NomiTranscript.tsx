@@ -60,7 +60,7 @@ function groupMessages(messages: HydratedTranscriptMessage[]): RenderItem[] {
   return result
 }
 
-interface KannaTranscriptProps {
+interface NomiTranscriptProps {
   messages: HydratedTranscriptMessage[]
   isLoading: boolean
   localPath?: string
@@ -74,7 +74,7 @@ interface KannaTranscriptProps {
   onExitPlanModeConfirm: (toolUseId: string, confirmed: boolean, clearContext?: boolean, message?: string) => void
 }
 
-export function KannaTranscript({
+export function NomiTranscript({
   messages,
   isLoading,
   localPath,
@@ -82,7 +82,7 @@ export function KannaTranscript({
   onOpenLocalLink,
   onAskUserQuestionSubmit,
   onExitPlanModeConfirm,
-}: KannaTranscriptProps) {
+}: NomiTranscriptProps) {
   const renderItems = useMemo(() => groupMessages(messages), [messages])
 
   function renderMessage(message: HydratedTranscriptMessage, index: number): React.ReactNode {

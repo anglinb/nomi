@@ -3,14 +3,12 @@ import { PROTOCOL_VERSION } from "../shared/types"
 import type { ClientEnvelope, ServerEnvelope, SubscriptionTopic } from "../shared/protocol"
 import { isClientEnvelope } from "../shared/protocol"
 import type { AgentCoordinator } from "./agent"
-import type { DiscoveredProject } from "./discovery"
 import { EventStore } from "./event-store"
 import { openExternal } from "./external-open"
 import { KeybindingsManager } from "./keybindings"
-import { ensureProjectDirectory } from "./paths"
 import { TerminalManager } from "./terminal-manager"
 import type { UpdateManager } from "./update-manager"
-import { deriveChatSnapshot, deriveLocalProjectsSnapshot, deriveSidebarData } from "./read-models"
+import { deriveChatSnapshot, deriveSidebarData } from "./read-models"
 
 export interface ClientState {
   subscriptions: Map<string, SubscriptionTopic>
@@ -21,9 +19,6 @@ interface CreateWsRouterArgs {
   agent: AgentCoordinator
   terminals: TerminalManager
   keybindings: KeybindingsManager
-  refreshDiscovery: () => Promise<DiscoveredProject[]>
-  getDiscoveredProjects: () => DiscoveredProject[]
-  machineDisplayName: string
   updateManager: UpdateManager | null
 }
 
@@ -36,9 +31,6 @@ export function createWsRouter({
   agent,
   terminals,
   keybindings,
-  refreshDiscovery,
-  getDiscoveredProjects,
-  machineDisplayName,
   updateManager,
 }: CreateWsRouterArgs) {
   const sockets = new Set<ServerWebSocket<ClientState>>()
@@ -52,21 +44,6 @@ export function createWsRouter({
         snapshot: {
           type: "sidebar",
           data: deriveSidebarData(store.state, agent.getActiveStatuses()),
-        },
-      }
-    }
-
-    if (topic.type === "local-projects") {
-      const discoveredProjects = getDiscoveredProjects()
-      const data = deriveLocalProjectsSnapshot(store.state, discoveredProjects, machineDisplayName)
-
-      return {
-        v: PROTOCOL_VERSION,
-        type: "snapshot",
-        id,
-        snapshot: {
-          type: "local-projects",
-          data,
         },
       }
     }
@@ -240,40 +217,13 @@ export function createWsRouter({
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: snapshot })
           return
         }
-        case "project.open": {
-          await ensureProjectDirectory(command.localPath)
-          const project = await store.openProject(command.localPath)
-          await refreshDiscovery()
-          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { projectId: project.id } })
-          break
-        }
-        case "project.create": {
-          await ensureProjectDirectory(command.localPath)
-          const project = await store.openProject(command.localPath, command.title)
-          await refreshDiscovery()
-          send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { projectId: project.id } })
-          break
-        }
-        case "project.remove": {
-          const project = store.getProject(command.projectId)
-          for (const chat of store.listChatsByProject(command.projectId)) {
-            await agent.cancel(chat.id)
-            await agent.closeChat(chat.id)
-          }
-          if (project) {
-            terminals.closeByCwd(project.localPath)
-          }
-          await store.removeProject(command.projectId)
-          send(ws, { v: PROTOCOL_VERSION, type: "ack", id })
-          break
-        }
         case "system.openExternal": {
           await openExternal(command)
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id })
           break
         }
         case "chat.create": {
-          const chat = await store.createChat(command.projectId)
+          const chat = await store.createChat(command.projectId ?? store.getDefaultProjectId())
           send(ws, { v: PROTOCOL_VERSION, type: "ack", id, result: { chatId: chat.id } })
           break
         }
@@ -315,7 +265,7 @@ export function createWsRouter({
           break
         }
         case "terminal.create": {
-          const project = store.getProject(command.projectId)
+          const project = store.getProject(command.projectId ?? store.getDefaultProjectId())
           if (!project) {
             throw new Error("Project not found")
           }
@@ -378,13 +328,6 @@ export function createWsRouter({
 
       if (parsed.type === "subscribe") {
         ws.data.subscriptions.set(parsed.id, parsed.topic)
-        if (parsed.topic.type === "local-projects") {
-          void refreshDiscovery().then(() => {
-            if (ws.data.subscriptions.has(parsed.id)) {
-              send(ws, createEnvelope(parsed.id, parsed.topic))
-            }
-          })
-        }
         send(ws, createEnvelope(parsed.id, parsed.topic))
         return
       }

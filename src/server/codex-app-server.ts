@@ -672,8 +672,8 @@ export class CodexAppServerManager {
 
     await this.sendRequest(context, "initialize", {
       clientInfo: {
-        name: "kanna_desktop",
-        title: "Kanna",
+        name: "nomi_desktop",
+        title: "Nomi",
         version: "0.1.0",
       },
       capabilities: {

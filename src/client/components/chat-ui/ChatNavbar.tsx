@@ -1,4 +1,5 @@
-import { Flower, Code, FolderOpen, Menu, PanelLeft, PanelRight, SquarePen, Terminal } from "lucide-react"
+import { Menu, PanelLeft, PanelRight, SquarePen, Terminal } from "lucide-react"
+import { NomiIcon } from "../ui/nomi-icon"
 import { Button } from "../ui/button"
 import { CardHeader } from "../ui/card"
 import { HotkeyTooltip, HotkeyTooltipContent, HotkeyTooltipTrigger } from "../ui/tooltip"
@@ -14,10 +15,6 @@ interface Props {
   onToggleEmbeddedTerminal?: () => void
   rightSidebarVisible?: boolean
   onToggleRightSidebar?: () => void
-  onOpenExternal?: (action: "open_finder" | "open_editor") => void
-  editorLabel?: string
-  finderShortcut?: string[]
-  editorShortcut?: string[]
   terminalShortcut?: string[]
   rightSidebarShortcut?: string[]
 }
@@ -32,10 +29,6 @@ export function ChatNavbar({
   onToggleEmbeddedTerminal,
   rightSidebarVisible = false,
   onToggleRightSidebar,
-  onOpenExternal,
-  editorLabel = "Editor",
-  finderShortcut,
-  editorShortcut,
   terminalShortcut,
   rightSidebarShortcut,
 }: Props) {
@@ -59,7 +52,7 @@ export function ChatNavbar({
           {sidebarCollapsed && (
             <>
               <div className="flex items-center justify-center w-[36px] h-[36px]">
-                <Flower className="h-4 w-4 sm:h-5 sm:w-5 text-logo ml-1 hidden md:block" />
+                <NomiIcon className="h-4 w-4 sm:h-5 sm:w-5 text-logo ml-1 hidden md:block" />
               </div>
               <Button
                 variant="ghost"
@@ -85,60 +78,24 @@ export function ChatNavbar({
         <div className="flex-1 min-w-0" />
 
         <div className="flex items-center gap-1 flex-shrink-0 border border-border rounded-full px-1.5 py-1 backdrop-blur-lg">
-          {localPath && (onOpenExternal || onToggleEmbeddedTerminal) && (
-            <>
-              {onOpenExternal ? (
-                <HotkeyTooltip>
-                  <HotkeyTooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onOpenExternal("open_finder")}
-                      title="Open in Finder"
-                      className="border border-border/0"
-                    >
-                      <FolderOpen className="h-4.5 w-4.5" />
-                    </Button>
-                  </HotkeyTooltipTrigger>
-                  <HotkeyTooltipContent side="bottom" shortcut={finderShortcut} />
-                </HotkeyTooltip>
-              ) : null}
-              {onToggleEmbeddedTerminal ? (
-                <HotkeyTooltip>
-                  <HotkeyTooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={onToggleEmbeddedTerminal}
-                      className={cn(
-                        "border border-border/0",
-                        embeddedTerminalVisible && "text-white"
-                      )}
-                    >
-                      <Terminal className="h-4.5 w-4.5" />
-                    </Button>
-                  </HotkeyTooltipTrigger>
-                  <HotkeyTooltipContent side="bottom" shortcut={terminalShortcut} />
-                </HotkeyTooltip>
-              ) : null}
-              {onOpenExternal ? (
-                <HotkeyTooltip>
-                  <HotkeyTooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onOpenExternal("open_editor")}
-                      title={`Open in ${editorLabel}`}
-                      className="border border-border/0"
-                    >
-                      <Code className="h-4.5 w-4.5" />
-                    </Button>
-                  </HotkeyTooltipTrigger>
-                  <HotkeyTooltipContent side="bottom" shortcut={editorShortcut} />
-                </HotkeyTooltip>
-              ) : null}
-            </>
-          )}
+          {localPath && onToggleEmbeddedTerminal ? (
+            <HotkeyTooltip>
+              <HotkeyTooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleEmbeddedTerminal}
+                  className={cn(
+                    "border border-border/0",
+                    embeddedTerminalVisible && "text-white"
+                  )}
+                >
+                  <Terminal className="h-4.5 w-4.5" />
+                </Button>
+              </HotkeyTooltipTrigger>
+              <HotkeyTooltipContent side="bottom" shortcut={terminalShortcut} />
+            </HotkeyTooltip>
+          ) : null}
           {onToggleRightSidebar ? (
             <HotkeyTooltip>
               <HotkeyTooltipTrigger asChild>

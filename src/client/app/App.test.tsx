@@ -20,98 +20,86 @@ describe("shouldRedirectToChangelog", () => {
 describe("getNotificationTitleCount", () => {
   test("counts unread chats and waiting-for-user chats", () => {
     expect(getNotificationTitleCount({
-      projectGroups: [{
-        groupKey: "project-1",
-        localPath: "/tmp/project",
-        chats: [
-          {
-            _id: "chat-1",
-            _creationTime: 1,
-            chatId: "chat-1",
-            title: "Unread",
-            status: "idle",
-            unread: true,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-          {
-            _id: "chat-2",
-            _creationTime: 2,
-            chatId: "chat-2",
-            title: "Waiting",
-            status: "waiting_for_user",
-            unread: false,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-          {
-            _id: "chat-3",
-            _creationTime: 3,
-            chatId: "chat-3",
-            title: "Both",
-            status: "waiting_for_user",
-            unread: true,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-        ],
-      }],
+      chats: [
+        {
+          _id: "chat-1",
+          _creationTime: 1,
+          chatId: "chat-1",
+          title: "Unread",
+          status: "idle",
+          unread: true,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+        {
+          _id: "chat-2",
+          _creationTime: 2,
+          chatId: "chat-2",
+          title: "Waiting",
+          status: "waiting_for_user",
+          unread: false,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+        {
+          _id: "chat-3",
+          _creationTime: 3,
+          chatId: "chat-3",
+          title: "Both",
+          status: "waiting_for_user",
+          unread: true,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+      ],
     })).toBe(4)
   })
 })
 
 describe("chat sound helpers", () => {
   const previous = {
-    projectGroups: [{
-      groupKey: "project-1",
+    chats: [{
+      _id: "chat-1",
+      _creationTime: 1,
+      chatId: "chat-1",
+      title: "Read",
+      status: "idle" as const,
+      unread: false,
       localPath: "/tmp/project",
-      chats: [{
-        _id: "chat-1",
-        _creationTime: 1,
-        chatId: "chat-1",
-        title: "Read",
-        status: "idle" as const,
-        unread: false,
-        localPath: "/tmp/project",
-        provider: null,
-        hasAutomation: false,
-      }],
+      provider: null,
+      hasAutomation: false,
     }],
   }
 
   test("extracts unread and waiting notification state", () => {
     const snapshot = getChatNotificationSnapshot({
-      projectGroups: [{
-        groupKey: "project-1",
-        localPath: "/tmp/project",
-        chats: [
-          {
-            _id: "chat-1",
-            _creationTime: 1,
-            chatId: "chat-1",
-            title: "Unread",
-            status: "idle",
-            unread: true,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-          {
-            _id: "chat-2",
-            _creationTime: 2,
-            chatId: "chat-2",
-            title: "Waiting",
-            status: "waiting_for_user",
-            unread: false,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-        ],
-      }],
+      chats: [
+        {
+          _id: "chat-1",
+          _creationTime: 1,
+          chatId: "chat-1",
+          title: "Unread",
+          status: "idle",
+          unread: true,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+        {
+          _id: "chat-2",
+          _creationTime: 2,
+          chatId: "chat-2",
+          title: "Waiting",
+          status: "waiting_for_user",
+          unread: false,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+      ],
     })
 
     expect(snapshot.unreadCount).toBe(1)
@@ -124,53 +112,45 @@ describe("chat sound helpers", () => {
 
   test("plays per unread increment and new waiting chat", () => {
     expect(getChatSoundBurstCount(previous, {
-      projectGroups: [{
-        groupKey: "project-1",
-        localPath: "/tmp/project",
-        chats: [
-          {
-            _id: "chat-1",
-            _creationTime: 1,
-            chatId: "chat-1",
-            title: "Unread",
-            status: "idle",
-            unread: true,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-          {
-            _id: "chat-2",
-            _creationTime: 2,
-            chatId: "chat-2",
-            title: "Waiting",
-            status: "waiting_for_user",
-            unread: true,
-            localPath: "/tmp/project",
-            provider: null,
-            hasAutomation: false,
-          },
-        ],
-      }],
+      chats: [
+        {
+          _id: "chat-1",
+          _creationTime: 1,
+          chatId: "chat-1",
+          title: "Unread",
+          status: "idle",
+          unread: true,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+        {
+          _id: "chat-2",
+          _creationTime: 2,
+          chatId: "chat-2",
+          title: "Waiting",
+          status: "waiting_for_user",
+          unread: true,
+          localPath: "/tmp/project",
+          provider: null,
+          hasAutomation: false,
+        },
+      ],
     })).toBe(3)
   })
 
   test("does not replay for an already-waiting chat", () => {
     const current = {
-      projectGroups: [{
-        groupKey: "project-1",
+      chats: [{
+        _id: "chat-1",
+        _creationTime: 1,
+        chatId: "chat-1",
+        title: "Waiting",
+        status: "waiting_for_user" as const,
+        unread: false,
         localPath: "/tmp/project",
-        chats: [{
-          _id: "chat-1",
-          _creationTime: 1,
-          chatId: "chat-1",
-          title: "Waiting",
-          status: "waiting_for_user" as const,
-          unread: false,
-          localPath: "/tmp/project",
-          provider: null,
-          hasAutomation: false,
-        }],
+        provider: null,
+        hasAutomation: false,
       }],
     }
 

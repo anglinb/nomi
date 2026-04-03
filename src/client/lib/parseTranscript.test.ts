@@ -27,14 +27,14 @@ describe("processTranscriptMessages", () => {
       entry({
         kind: "tool_result",
         toolId: "tool-1",
-        content: "/Users/jake/Projects/kanna\n",
+        content: "/Users/jake/Projects/nomi\n",
       }),
     ])
 
     expect(messages).toHaveLength(1)
     expect(messages[0]?.kind).toBe("tool")
     if (messages[0]?.kind !== "tool") throw new Error("unexpected message")
-    expect(messages[0].result).toBe("/Users/jake/Projects/kanna\n")
+    expect(messages[0].result).toBe("/Users/jake/Projects/nomi\n")
   })
 
   test("hydrates ask-user-question results with typed answers", () => {
@@ -98,8 +98,8 @@ describe("processTranscriptMessages", () => {
           id: "file-1",
           kind: "file",
           displayName: "spec.pdf",
-          absolutePath: "/tmp/project/.kanna/uploads/spec.pdf",
-          relativePath: "./.kanna/uploads/spec.pdf",
+          absolutePath: "/tmp/project/.nomi/uploads/spec.pdf",
+          relativePath: "./.nomi/uploads/spec.pdf",
           contentUrl: "/api/projects/project-1/uploads/spec.pdf/content",
           mimeType: "application/pdf",
           size: 1234,
@@ -110,7 +110,7 @@ describe("processTranscriptMessages", () => {
     expect(messages[0]?.kind).toBe("user_prompt")
     if (messages[0]?.kind !== "user_prompt") throw new Error("unexpected message")
     expect(messages[0].attachments).toHaveLength(1)
-    expect(messages[0].attachments?.[0]?.relativePath).toBe("./.kanna/uploads/spec.pdf")
+    expect(messages[0].attachments?.[0]?.relativePath).toBe("./.nomi/uploads/spec.pdf")
   })
 
   test("preserves structured Claude ask-user-question results when a later echoed tool result arrives", () => {

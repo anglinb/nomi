@@ -3,7 +3,6 @@ import type {
   ChatAttachment,
   ChatSnapshot,
   KeybindingsSnapshot,
-  LocalProjectsSnapshot,
   ModelOptions,
   SidebarData,
   UpdateSnapshot,
@@ -18,7 +17,6 @@ export interface EditorOpenSettings {
 
 export type SubscriptionTopic =
   | { type: "sidebar" }
-  | { type: "local-projects" }
   | { type: "update" }
   | { type: "keybindings" }
   | { type: "chat"; chatId: string }
@@ -43,9 +41,6 @@ export type TerminalEvent =
   | { type: "terminal.exit"; terminalId: string; exitCode: number; signal?: number }
 
 export type ClientCommand =
-  | { type: "project.open"; localPath: string }
-  | { type: "project.create"; localPath: string; title: string }
-  | { type: "project.remove"; projectId: string }
   | { type: "system.ping" }
   | { type: "update.check"; force?: boolean }
   | { type: "update.install" }
@@ -59,7 +54,7 @@ export type ClientCommand =
       column?: number
       editor?: EditorOpenSettings
     }
-  | { type: "chat.create"; projectId: string }
+  | { type: "chat.create"; projectId?: string }
   | { type: "chat.rename"; chatId: string; title: string }
   | { type: "chat.delete"; chatId: string }
   | { type: "chat.markRead"; chatId: string }
@@ -78,7 +73,7 @@ export type ClientCommand =
   | { type: "chat.cancel"; chatId: string }
   | { type: "chat.stopDraining"; chatId: string }
   | { type: "chat.respondTool"; chatId: string; toolUseId: string; result: unknown }
-  | { type: "terminal.create"; projectId: string; terminalId: string; cols: number; rows: number; scrollback: number }
+  | { type: "terminal.create"; projectId?: string; terminalId: string; cols: number; rows: number; scrollback: number }
   | { type: "terminal.input"; terminalId: string; data: string }
   | { type: "terminal.resize"; terminalId: string; cols: number; rows: number }
   | { type: "terminal.close"; terminalId: string }
@@ -90,7 +85,6 @@ export type ClientEnvelope =
 
 export type ServerSnapshot =
   | { type: "sidebar"; data: SidebarData }
-  | { type: "local-projects"; data: LocalProjectsSnapshot }
   | { type: "update"; data: UpdateSnapshot }
   | { type: "keybindings"; data: KeybindingsSnapshot }
   | { type: "chat"; data: ChatSnapshot | null }

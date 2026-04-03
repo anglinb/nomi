@@ -15,7 +15,7 @@ describe("buildEditorCommand", () => {
   test("builds a preset goto command for file links", () => {
     expect(
       buildEditorCommand({
-        localPath: "/Users/jake/Projects/kanna/src/client/app/App.tsx",
+        localPath: "/Users/jake/Projects/nomi/src/client/app/App.tsx",
         isDirectory: false,
         line: 12,
         column: 3,
@@ -24,28 +24,28 @@ describe("buildEditorCommand", () => {
       })
     ).toEqual({
       command: "code",
-      args: ["--goto", "/Users/jake/Projects/kanna/src/client/app/App.tsx:12:3"],
+      args: ["--goto", "/Users/jake/Projects/nomi/src/client/app/App.tsx:12:3"],
     })
   })
 
   test("builds a preset project command for directory opens", () => {
     expect(
       buildEditorCommand({
-        localPath: "/Users/jake/Projects/kanna",
+        localPath: "/Users/jake/Projects/nomi",
         isDirectory: true,
         editor: { preset: "cursor", commandTemplate: "cursor {path}" },
         platform: "linux",
       })
     ).toEqual({
       command: "cursor",
-      args: ["/Users/jake/Projects/kanna"],
+      args: ["/Users/jake/Projects/nomi"],
     })
   })
 
   test("uses the custom template for editor opens", () => {
     expect(
       buildEditorCommand({
-        localPath: "/Users/jake/Projects/kanna/src/client/app/App.tsx",
+        localPath: "/Users/jake/Projects/nomi/src/client/app/App.tsx",
         isDirectory: false,
         line: 12,
         column: 1,
@@ -54,7 +54,7 @@ describe("buildEditorCommand", () => {
       })
     ).toEqual({
       command: "my-editor",
-      args: ["/Users/jake/Projects/kanna/src/client/app/App.tsx", "--line", "12"],
+      args: ["/Users/jake/Projects/nomi/src/client/app/App.tsx", "--line", "12"],
     })
   })
 })

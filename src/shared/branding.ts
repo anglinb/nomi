@@ -1,13 +1,13 @@
-export const APP_NAME = "Kanna"
-export const CLI_COMMAND = "kanna"
-export const DATA_ROOT_NAME = ".kanna"
-export const DEV_DATA_ROOT_NAME = ".kanna-dev"
-export const PACKAGE_NAME = "kanna-code"
-export const RUNTIME_PROFILE_ENV_VAR = "KANNA_RUNTIME_PROFILE"
+export const APP_NAME = "Nomi"
+export const CLI_COMMAND = "nomi"
+export const DATA_ROOT_NAME = ".nomi"
+export const DEV_DATA_ROOT_NAME = ".nomi-dev"
+export const PACKAGE_NAME = "nomi-code"
+export const RUNTIME_PROFILE_ENV_VAR = "NOMI_RUNTIME_PROFILE"
 // Read version from package.json — JSON import works in both Bun and Vite
 import pkg from "../../package.json"
-export const SDK_CLIENT_APP = `kanna/${pkg.version}`
-export const LOG_PREFIX = "[kanna]"
+export const SDK_CLIENT_APP = `nomi/${pkg.version}`
+export const LOG_PREFIX = "[nomi]"
 export const DEFAULT_NEW_PROJECT_ROOT = `~/${APP_NAME}`
 
 export type RuntimeProfile = "dev" | "prod"

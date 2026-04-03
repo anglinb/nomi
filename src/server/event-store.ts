@@ -18,6 +18,8 @@ import {
 } from "./events"
 import { resolveLocalPath } from "./paths"
 
+export const DEFAULT_PROJECT_ID = "default"
+
 const COMPACTION_THRESHOLD_BYTES = 2 * 1024 * 1024
 
 interface LegacyTranscriptStats {
@@ -52,7 +54,7 @@ export class EventStore {
     this.transcriptsDir = path.join(this.dataDir, "transcripts")
   }
 
-  async initialize() {
+  async initialize(workingDir?: string) {
     await mkdir(this.dataDir, { recursive: true })
     await mkdir(this.transcriptsDir, { recursive: true })
     await this.ensureFile(this.projectsLogPath)
@@ -61,9 +63,31 @@ export class EventStore {
     await this.ensureFile(this.turnsLogPath)
     await this.loadSnapshot()
     await this.replayLogs()
+    await this.ensureDefaultProject(workingDir)
     if (!(await this.hasLegacyTranscriptData()) && await this.shouldCompact()) {
       await this.compact()
     }
+  }
+
+  getDefaultProjectId(): string {
+    return DEFAULT_PROJECT_ID
+  }
+
+  private async ensureDefaultProject(workingDir?: string) {
+    const desiredPath = resolveLocalPath(workingDir ?? homedir())
+    const existing = this.state.projectsById.get(DEFAULT_PROJECT_ID)
+
+    if (existing && !existing.deletedAt && existing.localPath === desiredPath) return
+
+    const event: ProjectEvent = {
+      v: STORE_VERSION,
+      type: "project_opened",
+      timestamp: Date.now(),
+      projectId: DEFAULT_PROJECT_ID,
+      localPath: desiredPath,
+      title: path.basename(desiredPath) || "Default",
+    }
+    await this.append(this.projectsLogPath, event)
   }
 
   private async ensureFile(filePath: string) {
@@ -381,7 +405,7 @@ export class EventStore {
     await this.append(this.projectsLogPath, event)
   }
 
-  async createChat(projectId: string) {
+  async createChat(projectId: string = DEFAULT_PROJECT_ID) {
     const project = this.state.projectsById.get(projectId)
     if (!project || project.deletedAt) {
       throw new Error("Project not found")

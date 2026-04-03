@@ -1,4 +1,4 @@
-export const DEFAULT_DEV_CLIENT_PORT = 5174
+export const DEFAULT_DEV_CLIENT_PORT = 5177
 
 export function getDefaultDevServerPort(clientPort = DEFAULT_DEV_CLIENT_PORT) {
   return clientPort + 1

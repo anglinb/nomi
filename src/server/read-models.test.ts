@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { deriveChatSnapshot, deriveLocalProjectsSnapshot, deriveSidebarData } from "./read-models"
+import { deriveChatSnapshot, deriveSidebarData } from "./read-models"
 import { createEmptyState } from "./events"
 
 describe("read models", () => {
@@ -27,8 +27,8 @@ describe("read models", () => {
     })
 
     const sidebar = deriveSidebarData(state, new Map())
-    expect(sidebar.projectGroups[0]?.chats[0]?.provider).toBe("codex")
-    expect(sidebar.projectGroups[0]?.chats[0]?.unread).toBe(true)
+    expect(sidebar.chats[0]?.provider).toBe("codex")
+    expect(sidebar.chats[0]?.unread).toBe(true)
   })
 
   test("includes available providers in chat snapshots", () => {
@@ -64,46 +64,46 @@ describe("read models", () => {
     ])
   })
 
-  test("prefers saved project metadata over discovered entries for the same path", () => {
+  test("returns flat chat list sorted by lastMessageAt", () => {
     const state = createEmptyState()
     state.projectsById.set("project-1", {
       id: "project-1",
       localPath: "/tmp/project",
-      title: "Saved Project",
+      title: "Project",
       createdAt: 1,
-      updatedAt: 50,
+      updatedAt: 1,
     })
     state.projectIdsByPath.set("/tmp/project", "project-1")
     state.chatsById.set("chat-1", {
       id: "chat-1",
       projectId: "project-1",
-      title: "Chat",
+      title: "Older Chat",
       createdAt: 1,
-      updatedAt: 75,
+      updatedAt: 1,
       unread: false,
-      provider: "codex",
+      provider: null,
       planMode: false,
       sessionToken: null,
-      lastMessageAt: 100,
+      lastMessageAt: 10,
+      lastTurnOutcome: null,
+    })
+    state.chatsById.set("chat-2", {
+      id: "chat-2",
+      projectId: "project-1",
+      title: "Newer Chat",
+      createdAt: 2,
+      updatedAt: 2,
+      unread: false,
+      provider: null,
+      planMode: false,
+      sessionToken: null,
+      lastMessageAt: 20,
       lastTurnOutcome: null,
     })
 
-    const snapshot = deriveLocalProjectsSnapshot(state, [
-      {
-        localPath: "/tmp/project",
-        title: "Discovered Project",
-        modifiedAt: 10,
-      },
-    ], "Local Machine")
-
-    expect(snapshot.projects).toEqual([
-      {
-        localPath: "/tmp/project",
-        title: "Saved Project",
-        source: "saved",
-        lastOpenedAt: 100,
-        chatCount: 1,
-      },
-    ])
+    const sidebar = deriveSidebarData(state, new Map())
+    expect(sidebar.chats).toHaveLength(2)
+    expect(sidebar.chats[0]?.chatId).toBe("chat-2")
+    expect(sidebar.chats[1]?.chatId).toBe("chat-1")
   })
 })

@@ -24,7 +24,7 @@ const DEFAULT_KEYBINDINGS_SNAPSHOT: KeybindingsSnapshot = {
     addSplitTerminal: ["cmd+shift+j"],
   },
   warning: null,
-  filePathDisplay: "~/.kanna/keybindings.json",
+  filePathDisplay: "~/.nomi/keybindings.json",
 }
 
 const DEFAULT_UPDATE_SNAPSHOT: UpdateSnapshot = {
@@ -50,9 +50,7 @@ describe("ws-router", () => {
         getSnapshot: () => DEFAULT_KEYBINDINGS_SNAPSHOT,
         onChange: () => () => {},
       } as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: null,
     })
     const ws = new FakeWebSocket()
@@ -90,9 +88,7 @@ describe("ws-router", () => {
         getSnapshot: () => DEFAULT_KEYBINDINGS_SNAPSHOT,
         onChange: () => () => {},
       } as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: null,
     })
     const ws = new FakeWebSocket()
@@ -133,9 +129,7 @@ describe("ws-router", () => {
         getSnapshot: () => DEFAULT_KEYBINDINGS_SNAPSHOT,
         onChange: () => () => {},
       } as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: null,
     })
     const ws = new FakeWebSocket()
@@ -219,9 +213,7 @@ describe("ws-router", () => {
         getSnapshot: () => DEFAULT_KEYBINDINGS_SNAPSHOT,
         onChange: () => () => {},
       } as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: null,
     })
     const wsA = new FakeWebSocket()
@@ -273,21 +265,17 @@ describe("ws-router", () => {
       snapshot: {
         type: "sidebar",
         data: {
-          projectGroups: [{
-            groupKey: "project-1",
+          chats: [{
+            _id: "chat-1",
+            _creationTime: 1,
+            chatId: "chat-1",
+            title: "Chat",
+            status: "idle",
+            unread: false,
             localPath: "/tmp/project",
-            chats: [{
-              _id: "chat-1",
-              _creationTime: 1,
-              chatId: "chat-1",
-              title: "Chat",
-              status: "idle",
-              unread: false,
-              localPath: "/tmp/project",
-              provider: null,
-              lastMessageAt: undefined,
-              hasAutomation: false,
-            }],
+            provider: null,
+            lastMessageAt: undefined,
+            hasAutomation: false,
           }],
         },
       },
@@ -299,21 +287,17 @@ describe("ws-router", () => {
       snapshot: {
         type: "sidebar",
         data: {
-          projectGroups: [{
-            groupKey: "project-1",
+          chats: [{
+            _id: "chat-1",
+            _creationTime: 1,
+            chatId: "chat-1",
+            title: "Chat",
+            status: "idle",
+            unread: false,
             localPath: "/tmp/project",
-            chats: [{
-              _id: "chat-1",
-              _creationTime: 1,
-              chatId: "chat-1",
-              title: "Chat",
-              status: "idle",
-              unread: false,
-              localPath: "/tmp/project",
-              provider: null,
-              lastMessageAt: undefined,
-              hasAutomation: false,
-            }],
+            provider: null,
+            lastMessageAt: undefined,
+            hasAutomation: false,
           }],
         },
       },
@@ -338,9 +322,7 @@ describe("ws-router", () => {
         getSnapshot: () => DEFAULT_KEYBINDINGS_SNAPSHOT,
         onChange: () => () => {},
       } as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: null,
     })
     const ws = new FakeWebSocket()
@@ -366,7 +348,7 @@ describe("ws-router", () => {
       },
       onChange: () => () => {},
       async write(bindings: KeybindingsSnapshot["bindings"]) {
-        this.snapshot = { bindings, warning: null, filePathDisplay: "~/.kanna/keybindings.json" }
+        this.snapshot = { bindings, warning: null, filePathDisplay: "~/.nomi/keybindings.json" }
         return this.snapshot
       },
     }
@@ -379,9 +361,7 @@ describe("ws-router", () => {
         onEvent: () => () => {},
       } as never,
       keybindings: keybindings as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: null,
     })
     const ws = new FakeWebSocket()
@@ -439,7 +419,7 @@ describe("ws-router", () => {
           addSplitTerminal: ["cmd+alt+j"],
         },
         warning: null,
-        filePathDisplay: "~/.kanna/keybindings.json",
+        filePathDisplay: "~/.nomi/keybindings.json",
       },
     })
   })
@@ -483,9 +463,7 @@ describe("ws-router", () => {
         getSnapshot: () => DEFAULT_KEYBINDINGS_SNAPSHOT,
         onChange: () => () => {},
       } as never,
-      refreshDiscovery: async () => [],
-      getDiscoveredProjects: () => [],
-      machineDisplayName: "Local Machine",
+
       updateManager: updateManager as never,
     })
     const ws = new FakeWebSocket()

@@ -7,21 +7,21 @@ import type { TranscriptEntry } from "../shared/types"
 import type { SnapshotFile } from "./events"
 import { EventStore } from "./event-store"
 
-const originalRuntimeProfile = process.env.KANNA_RUNTIME_PROFILE
+const originalRuntimeProfile = process.env.NOMI_RUNTIME_PROFILE
 const tempDirs: string[] = []
 
 afterEach(async () => {
   if (originalRuntimeProfile === undefined) {
-    delete process.env.KANNA_RUNTIME_PROFILE
+    delete process.env.NOMI_RUNTIME_PROFILE
   } else {
-    process.env.KANNA_RUNTIME_PROFILE = originalRuntimeProfile
+    process.env.NOMI_RUNTIME_PROFILE = originalRuntimeProfile
   }
 
   await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })))
 })
 
 async function createTempDataDir() {
-  const dir = await mkdtemp(join(tmpdir(), "kanna-event-store-"))
+  const dir = await mkdtemp(join(tmpdir(), "nomi-event-store-"))
   tempDirs.push(dir)
   return dir
 }
@@ -36,11 +36,11 @@ function entry(kind: "user_prompt" | "assistant_text", createdAt: number, extra:
 
 describe("EventStore", () => {
   test("uses the runtime profile for the default data dir", () => {
-    process.env.KANNA_RUNTIME_PROFILE = "dev"
+    process.env.NOMI_RUNTIME_PROFILE = "dev"
 
     const store = new EventStore()
 
-    expect(store.dataDir).toEndWith("/.kanna-dev/data")
+    expect(store.dataDir).toEndWith("/.nomi-dev/data")
   })
 
   test("migrates legacy snapshot and messages log transcripts into per-chat files", async () => {
@@ -194,5 +194,27 @@ describe("EventStore", () => {
     await store.initialize()
 
     expect(store.getChat("chat-1")?.unread).toBe(false)
+  })
+
+  test("initialize with workingDir sets default project localPath", async () => {
+    const dataDir = await createTempDataDir()
+    const store = new EventStore(dataDir)
+    await store.initialize("/tmp/custom-project")
+
+    const project = store.getProject(store.getDefaultProjectId())
+    expect(project).not.toBeNull()
+    expect(project!.localPath).toBe("/tmp/custom-project")
+  })
+
+  test("initialize updates default project localPath when dir changes", async () => {
+    const dataDir = await createTempDataDir()
+
+    const store1 = new EventStore(dataDir)
+    await store1.initialize("/tmp/first-dir")
+    expect(store1.getProject(store1.getDefaultProjectId())!.localPath).toBe("/tmp/first-dir")
+
+    const store2 = new EventStore(dataDir)
+    await store2.initialize("/tmp/second-dir")
+    expect(store2.getProject(store2.getDefaultProjectId())!.localPath).toBe("/tmp/second-dir")
   })
 })

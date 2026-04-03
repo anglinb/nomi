@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
-import { ArrowDown, Flower, Upload } from "lucide-react"
+import { ArrowDown, Upload } from "lucide-react"
+import { NomiIcon } from "../components/ui/nomi-icon"
 import { useOutletContext } from "react-router-dom"
 import type { HydratedTranscriptMessage } from "../../shared/types"
 import { ChatInput, type ChatInputHandle } from "../components/chat-ui/ChatInput"
@@ -26,8 +27,8 @@ import { shouldCloseTerminalPane } from "./terminalLayoutResize"
 import { TERMINAL_TOGGLE_ANIMATION_DURATION_MS } from "./terminalToggleAnimation"
 import { useRightSidebarToggleAnimation } from "./useRightSidebarToggleAnimation"
 import { useTerminalToggleAnimation } from "./useTerminalToggleAnimation"
-import type { KannaState } from "./useKannaState"
-import { KannaTranscript } from "./KannaTranscript"
+import type { NomiState } from "./useNomiState"
+import { NomiTranscript } from "./NomiTranscript"
 import { useStickyChatFocus } from "./useStickyChatFocus"
 
 const EMPTY_STATE_TEXT = "What are we building?"
@@ -95,7 +96,7 @@ export function hasFileDragTypes(types: Iterable<string>) {
 }
 
 export function ChatPage() {
-  const state = useOutletContext<KannaState>()
+  const state = useOutletContext<NomiState>()
   const layoutRootRef = useRef<HTMLDivElement>(null)
   const chatCardRef = useRef<HTMLDivElement>(null)
   const chatInputElementRef = useRef<HTMLTextAreaElement>(null)
@@ -164,7 +165,7 @@ export function ChatPage() {
   useStickyChatFocus({
     rootRef: chatCardRef,
     fallbackRef: chatInputElementRef,
-    enabled: state.hasSelectedProject && state.runtime?.status !== "waiting_for_user",
+    enabled: true && state.runtime?.status !== "waiting_for_user",
     canCancel: state.canCancel,
   })
 
@@ -173,7 +174,7 @@ export function ChatPage() {
   }
 
   function enqueueDroppedFiles(files: File[]) {
-    if (!state.hasSelectedProject || files.length === 0) {
+    if (!true || files.length === 0) {
       return
     }
     chatInputRef.current?.enqueueFiles(files)
@@ -242,18 +243,6 @@ export function ChatPage() {
       if (actionMatchesEvent(resolvedKeybindings, "toggleRightSidebar", event)) {
         event.preventDefault()
         toggleRightSidebar(projectId)
-        return
-      }
-
-      if (actionMatchesEvent(resolvedKeybindings, "openInFinder", event)) {
-        event.preventDefault()
-        void state.handleOpenExternal("open_finder")
-        return
-      }
-
-      if (actionMatchesEvent(resolvedKeybindings, "openInEditor", event)) {
-        event.preventDefault()
-        void state.handleOpenExternal("open_editor")
         return
       }
 
@@ -329,13 +318,13 @@ export function ChatPage() {
       ref={chatCardRef}
       className="bg-background h-full flex flex-col overflow-hidden border-0 rounded-none relative"
       onDragEnter={(event) => {
-        if (!hasDraggedFiles(event) || !state.hasSelectedProject) return
+        if (!hasDraggedFiles(event) || !true) return
         event.preventDefault()
         pageFileDragDepthRef.current += 1
         setIsPageFileDragActive(true)
       }}
       onDragOver={(event) => {
-        if (!hasDraggedFiles(event) || !state.hasSelectedProject) return
+        if (!hasDraggedFiles(event) || !true) return
         event.preventDefault()
         event.dataTransfer.dropEffect = "copy"
         if (!isPageFileDragActive) {
@@ -343,7 +332,7 @@ export function ChatPage() {
         }
       }}
       onDragLeave={(event) => {
-        if (!hasDraggedFiles(event) || !state.hasSelectedProject) return
+        if (!hasDraggedFiles(event) || !true) return
         event.preventDefault()
         pageFileDragDepthRef.current = Math.max(0, pageFileDragDepthRef.current - 1)
         if (pageFileDragDepthRef.current === 0) {
@@ -351,7 +340,7 @@ export function ChatPage() {
         }
       }}
       onDrop={(event) => {
-        if (!hasDraggedFiles(event) || !state.hasSelectedProject) return
+        if (!hasDraggedFiles(event) || !true) return
         event.preventDefault()
         pageFileDragDepthRef.current = 0
         setIsPageFileDragActive(false)
@@ -369,12 +358,6 @@ export function ChatPage() {
           onToggleEmbeddedTerminal={projectId ? handleToggleEmbeddedTerminal : undefined}
           rightSidebarVisible={showRightSidebar}
           onToggleRightSidebar={projectId ? () => toggleRightSidebar(projectId) : undefined}
-          onOpenExternal={(action) => {
-            void state.handleOpenExternal(action)
-          }}
-          editorLabel={state.editorLabel}
-          finderShortcut={resolvedKeybindings.bindings.openInFinder}
-          editorShortcut={resolvedKeybindings.bindings.openInEditor}
           terminalShortcut={resolvedKeybindings.bindings.toggleEmbeddedTerminal}
           rightSidebarShortcut={resolvedKeybindings.bindings.toggleRightSidebar}
         />
@@ -388,7 +371,7 @@ export function ChatPage() {
           {state.messages.length > 0 ? (
             <>
               <div className="animate-fade-in space-y-5 pt-[72px] max-w-[800px] mx-auto">
-                <KannaTranscript
+                <NomiTranscript
                   messages={state.messages}
                   isLoading={state.isProcessing}
                   localPath={state.runtime?.localPath}
@@ -460,21 +443,21 @@ export function ChatPage() {
           >
             <div className="mx-auto flex h-full max-w-[800px] items-center justify-center">
               <div className="flex flex-col items-center justify-center text-muted-foreground gap-4 opacity-70">
-                <Flower strokeWidth={1.5} className="size-8 text-muted-foreground kanna-empty-state-flower"></Flower>
+                <NomiIcon strokeWidth={1.5} className="size-8 text-muted-foreground nomi-empty-state-flower" />
                 <div
-                  className="text-base font-normal text-muted-foreground text-center max-w-xs flex items-center kanna-empty-state-text"
+                  className="text-base font-normal text-muted-foreground text-center max-w-xs flex items-center nomi-empty-state-text"
                   aria-label={EMPTY_STATE_TEXT}
                 >
                   <span className="relative inline-grid place-items-start">
                     <span className="invisible col-start-1 row-start-1 whitespace-pre flex items-center">
                       <span>{EMPTY_STATE_TEXT}</span>
-                      <span className="kanna-typewriter-cursor-slot" aria-hidden="true" />
+                      <span className="nomi-typewriter-cursor-slot" aria-hidden="true" />
                     </span>
                     <span className="col-start-1 row-start-1 whitespace-pre flex items-center">
                       <span>{typedEmptyStateText}</span>
-                      <span className="kanna-typewriter-cursor-slot" aria-hidden="true">
+                      <span className="nomi-typewriter-cursor-slot" aria-hidden="true">
                         <span
-                          className="kanna-typewriter-cursor"
+                          className="nomi-typewriter-cursor"
                           data-typing-complete={isEmptyStateTypingComplete ? "true" : "false"}
                         />
                       </span>
@@ -528,7 +511,7 @@ export function ChatPage() {
             onCancel={() => {
               void state.handleCancel()
             }}
-            disabled={!state.hasSelectedProject || state.runtime?.status === "waiting_for_user"}
+            disabled={!true || state.runtime?.status === "waiting_for_user"}
             canCancel={state.canCancel}
             chatId={state.activeChatId}
             projectId={projectId}

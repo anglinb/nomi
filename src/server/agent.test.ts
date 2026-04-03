@@ -108,8 +108,8 @@ describe("attachment prompt helpers", () => {
         id: "image-1",
         kind: "image",
         displayName: "shot.png",
-        absolutePath: "/tmp/project/.kanna/uploads/shot.png",
-        relativePath: "./.kanna/uploads/shot.png",
+        absolutePath: "/tmp/project/.nomi/uploads/shot.png",
+        relativePath: "./.nomi/uploads/shot.png",
         contentUrl: "/api/projects/project-1/uploads/shot.png/content",
         mimeType: "image/png",
         size: 512,
@@ -118,8 +118,8 @@ describe("attachment prompt helpers", () => {
         id: "file-1",
         kind: "file",
         displayName: "spec.pdf",
-        absolutePath: "/tmp/project/.kanna/uploads/spec.pdf",
-        relativePath: "./.kanna/uploads/spec.pdf",
+        absolutePath: "/tmp/project/.nomi/uploads/spec.pdf",
+        relativePath: "./.nomi/uploads/spec.pdf",
         contentUrl: "/api/projects/project-1/uploads/spec.pdf/content",
         mimeType: "application/pdf",
         size: 1234,
@@ -127,9 +127,9 @@ describe("attachment prompt helpers", () => {
     ]
 
     const prompt = buildPromptText("Review these", attachments)
-    expect(prompt).toContain("<kanna-attachments>")
-    expect(prompt).toContain('path="/tmp/project/.kanna/uploads/shot.png"')
-    expect(prompt).toContain('project_path="./.kanna/uploads/spec.pdf"')
+    expect(prompt).toContain("<nomi-attachments>")
+    expect(prompt).toContain('path="/tmp/project/.nomi/uploads/shot.png"')
+    expect(prompt).toContain('project_path="./.nomi/uploads/spec.pdf"')
   })
 
   test("supports attachment-only prompts", () => {
@@ -137,8 +137,8 @@ describe("attachment prompt helpers", () => {
       id: "file-1",
       kind: "file",
       displayName: "todo.txt",
-      absolutePath: "/tmp/project/.kanna/uploads/todo.txt",
-      relativePath: "./.kanna/uploads/todo.txt",
+      absolutePath: "/tmp/project/.nomi/uploads/todo.txt",
+      relativePath: "./.nomi/uploads/todo.txt",
       contentUrl: "/api/projects/project-1/uploads/todo.txt/content",
       mimeType: "text/plain",
       size: 32,
@@ -152,8 +152,8 @@ describe("attachment prompt helpers", () => {
       id: "file-1",
       kind: "file",
       displayName: "\"report\" <draft>.txt",
-      absolutePath: "/tmp/project/.kanna/uploads/report.txt",
-      relativePath: "./.kanna/uploads/report.txt",
+      absolutePath: "/tmp/project/.nomi/uploads/report.txt",
+      relativePath: "./.nomi/uploads/report.txt",
       contentUrl: "/api/projects/project-1/uploads/report.txt/content",
       mimeType: "text/plain",
       size: 64,

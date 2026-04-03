@@ -1,6 +1,6 @@
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Eraser, Plus, X } from "lucide-react"
-import type { SocketStatus, KannaSocket } from "../../app/socket"
+import type { SocketStatus, NomiSocket } from "../../app/socket"
 import { Button } from "../ui/button"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../ui/resizable"
 import { HotkeyTooltip, HotkeyTooltipContent, HotkeyTooltipTrigger } from "../ui/tooltip"
@@ -11,7 +11,7 @@ import { getMinimumTerminalWidth, getMinimumTerminalWorkspaceWidth } from "./Ter
 interface Props {
   projectId: string
   layout: ProjectTerminalLayout
-  socket: KannaSocket
+  socket: NomiSocket
   connectionStatus: SocketStatus
   scrollback: number
   minColumnWidth: number

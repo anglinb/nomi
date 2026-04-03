@@ -4,7 +4,7 @@ import { tmpdir } from "node:os"
 import path from "node:path"
 import { deleteProjectUpload, inferAttachmentContentType, persistProjectUpload } from "./uploads"
 import { getProjectUploadDir } from "./paths"
-import { persistUploadedFiles, startKannaServer } from "./server"
+import { persistUploadedFiles, startNomiServer } from "./server"
 
 const PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+yF9sAAAAASUVORK5CYII="
@@ -16,8 +16,8 @@ afterEach(async () => {
 })
 
 describe("uploads", () => {
-  test("stores uploads in .kanna/uploads and keeps duplicate filenames", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-upload-test-"))
+  test("stores uploads in .nomi/uploads and keeps duplicate filenames", async () => {
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-upload-test-"))
     tempDirs.push(projectDir)
 
     const first = await persistProjectUpload({
@@ -35,18 +35,18 @@ describe("uploads", () => {
       fallbackMimeType: "text/plain",
     })
 
-    expect(first.absolutePath).toBe(path.join(projectDir, ".kanna/uploads/notes.txt"))
-    expect(first.relativePath).toBe("./.kanna/uploads/notes.txt")
+    expect(first.absolutePath).toBe(path.join(projectDir, ".nomi/uploads/notes.txt"))
+    expect(first.relativePath).toBe("./.nomi/uploads/notes.txt")
     expect(first.contentUrl).toBe("/api/projects/project-1/uploads/notes.txt/content")
-    expect(second.absolutePath).toBe(path.join(projectDir, ".kanna/uploads/notes-1.txt"))
-    expect(second.relativePath).toBe("./.kanna/uploads/notes-1.txt")
+    expect(second.absolutePath).toBe(path.join(projectDir, ".nomi/uploads/notes-1.txt"))
+    expect(second.relativePath).toBe("./.nomi/uploads/notes-1.txt")
     expect(second.contentUrl).toBe("/api/projects/project-1/uploads/notes-1.txt/content")
-    expect(await Bun.file(path.join(projectDir, ".kanna/uploads/notes.txt")).text()).toBe("hello")
-    expect(await Bun.file(path.join(projectDir, ".kanna/uploads/notes-1.txt")).text()).toBe("world")
+    expect(await Bun.file(path.join(projectDir, ".nomi/uploads/notes.txt")).text()).toBe("hello")
+    expect(await Bun.file(path.join(projectDir, ".nomi/uploads/notes-1.txt")).text()).toBe("world")
   })
 
   test("stores concurrent same-name uploads without overwriting existing content", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-upload-concurrent-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-upload-concurrent-"))
     tempDirs.push(projectDir)
 
     const attachments = await Promise.all([
@@ -81,7 +81,7 @@ describe("uploads", () => {
   })
 
   test("detects image uploads and returns absolute plus project-relative paths", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-upload-image-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-upload-image-"))
     tempDirs.push(projectDir)
 
     const attachment = await persistProjectUpload({
@@ -93,17 +93,17 @@ describe("uploads", () => {
 
     expect(attachment.kind).toBe("image")
     expect(attachment.mimeType).toBe("image/png")
-    expect(getProjectUploadDir(projectDir)).toBe(path.join(projectDir, ".kanna", "uploads"))
-    expect(attachment.absolutePath).toBe(path.join(projectDir, ".kanna/uploads/pixel.png"))
-    expect(attachment.relativePath).toBe("./.kanna/uploads/pixel.png")
+    expect(getProjectUploadDir(projectDir)).toBe(path.join(projectDir, ".nomi", "uploads"))
+    expect(attachment.absolutePath).toBe(path.join(projectDir, ".nomi/uploads/pixel.png"))
+    expect(attachment.relativePath).toBe("./.nomi/uploads/pixel.png")
     expect(attachment.contentUrl).toBe("/api/projects/project-2/uploads/pixel.png/content")
   })
 
   test("serves uploaded attachment content through the project content URL", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-project-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-project-"))
     tempDirs.push(projectDir)
 
-    const server = await startKannaServer({ port: 4310, strictPort: true })
+    const server = await startNomiServer({ port: 4310, strictPort: true })
 
     try {
       const project = await server.store.openProject(projectDir, "Project")
@@ -125,10 +125,10 @@ describe("uploads", () => {
   })
 
   test("serves TypeScript uploads as text content", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-project-typescript-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-project-typescript-"))
     tempDirs.push(projectDir)
 
-    const server = await startKannaServer({ port: 4314, strictPort: true })
+    const server = await startNomiServer({ port: 4314, strictPort: true })
 
     try {
       const project = await server.store.openProject(projectDir, "Project")
@@ -150,10 +150,10 @@ describe("uploads", () => {
   })
 
   test("rejects non-GET requests for attachment content", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-project-content-method-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-project-content-method-"))
     tempDirs.push(projectDir)
 
-    const server = await startKannaServer({ port: 4312, strictPort: true })
+    const server = await startNomiServer({ port: 4312, strictPort: true })
 
     try {
       const project = await server.store.openProject(projectDir, "Project")
@@ -174,10 +174,10 @@ describe("uploads", () => {
   })
 
   test("rejects oversized uploads before reading them into memory", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-project-oversize-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-project-oversize-"))
     tempDirs.push(projectDir)
 
-    const server = await startKannaServer({ port: 4313, strictPort: true })
+    const server = await startNomiServer({ port: 4313, strictPort: true })
 
     try {
       const project = await server.store.openProject(projectDir, "Project")
@@ -199,7 +199,7 @@ describe("uploads", () => {
   })
 
   test("cleans up already-persisted files when a later file in the batch fails", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-project-cleanup-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-project-cleanup-"))
     tempDirs.push(projectDir)
 
     const files = [
@@ -222,12 +222,12 @@ describe("uploads", () => {
       })
     ).rejects.toThrow("disk full")
 
-    expect(await Bun.file(path.join(projectDir, ".kanna/uploads/first.txt")).exists()).toBe(false)
-    expect(await Bun.file(path.join(projectDir, ".kanna/uploads/second.txt")).exists()).toBe(false)
+    expect(await Bun.file(path.join(projectDir, ".nomi/uploads/first.txt")).exists()).toBe(false)
+    expect(await Bun.file(path.join(projectDir, ".nomi/uploads/second.txt")).exists()).toBe(false)
   })
 
   test("deletes uploaded attachments from the project uploads directory", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-upload-delete-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-upload-delete-"))
     tempDirs.push(projectDir)
 
     const attachment = await persistProjectUpload({
@@ -248,10 +248,10 @@ describe("uploads", () => {
   })
 
   test("deletes uploaded attachment content through the project delete URL", async () => {
-    const projectDir = await mkdtemp(path.join(tmpdir(), "kanna-project-delete-"))
+    const projectDir = await mkdtemp(path.join(tmpdir(), "nomi-project-delete-"))
     tempDirs.push(projectDir)
 
-    const server = await startKannaServer({ port: 4311, strictPort: true })
+    const server = await startNomiServer({ port: 4311, strictPort: true })
 
     try {
       const project = await server.store.openProject(projectDir, "Project")

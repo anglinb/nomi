@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="assets/icon.png" alt="Kanna" width="80" />
+  <img src="assets/icon.png" alt="Nomi" width="80" />
 </p> 
 
-<h1 align="center">Kanna</h1>
+<h1 align="center">Nomi</h1>
 
 <p align="center">
   <strong>A beautiful web UI for the Claude Code & Codex CLIs</strong>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/kanna-code"><img src="https://img.shields.io/npm/v/kanna-code.svg?style=flat&colorA=18181b&colorB=f472b6" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/nomi-code"><img src="https://img.shields.io/npm/v/nomi-code.svg?style=flat&colorA=18181b&colorB=f472b6" alt="npm version" /></a>
 </p>
 
 <br />
@@ -18,7 +18,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/screenshot.png" />
     <source media="(prefers-color-scheme: light)" srcset="assets/screenshot-light.png" />
-    <img src="assets/screenshot.png" alt="Kanna screenshot" width="800" />
+    <img src="assets/screenshot.png" alt="Nomi screenshot" width="800" />
   </picture>
 </p>
 
@@ -27,7 +27,7 @@
 ## Quickstart
 
 ```bash
-bun install -g kanna-code
+bun install -g nomi-code
 ```
 
 If Bun isn't installed, install it first:
@@ -39,10 +39,10 @@ curl -fsSL https://bun.sh/install | bash
 Then run from any project directory:
 
 ```bash
-kanna
+nomi
 ```
 
-That's it. Kanna opens in your browser at [`localhost:3210`](http://localhost:3210).
+That's it. Nomi opens in your browser at [`localhost:3210`](http://localhost:3210).
 
 ## Features
 
@@ -73,7 +73,7 @@ Bun Server (HTTP + WS)
     ↕  stdio
 Claude Agent SDK / Codex App Server (local processes)
     ↕
-Local File System (~/.kanna/data/, project dirs)
+Local File System (~/.nomi/data/, project dirs)
 ```
 
 **Key patterns:** Event sourcing for all state mutations. CQRS with separate write (event log) and read (derived snapshots) paths. Reactive broadcasting — subscribers get pushed fresh snapshots on every state change. Multi-provider agent coordination with tool gating for user-approval flows. Provider-agnostic transcript hydration for unified rendering.
@@ -88,10 +88,10 @@ Embedded terminal support uses Bun's native PTY APIs and currently works on macO
 
 ## Install
 
-Install Kanna globally:
+Install Nomi globally:
 
 ```bash
-bun install -g kanna-code
+bun install -g nomi-code
 ```
 
 If Bun isn't installed, install it first:
@@ -103,8 +103,8 @@ curl -fsSL https://bun.sh/install | bash
 Or clone and build from source:
 
 ```bash
-git clone https://github.com/jakemor/kanna.git
-cd kanna
+git clone https://github.com/jakemor/nomi.git
+cd nomi
 bun install
 bun run build
 ```
@@ -112,23 +112,23 @@ bun run build
 ## Usage
 
 ```bash
-kanna                  # start with defaults (localhost only)
-kanna --port 4000      # custom port
-kanna --no-open        # don't open browser
-kanna --share          # create a public share URL + terminal QR
+nomi                  # start with defaults (localhost only)
+nomi --port 4000      # custom port
+nomi --no-open        # don't open browser
+nomi --share          # create a public share URL + terminal QR
 ```
 
 Default URL: `http://localhost:3210`
 
 ### Network access (Tailscale / LAN)
 
-By default Kanna binds to `127.0.0.1` (localhost only). Use `--host` to bind a specific interface, or `--remote` as a shorthand for `0.0.0.0`:
+By default Nomi binds to `127.0.0.1` (localhost only). Use `--host` to bind a specific interface, or `--remote` as a shorthand for `0.0.0.0`:
 
 ```bash
-kanna --remote                     # bind all interfaces — browser opens localhost:3210
-kanna --host dev-box               # bind to a specific hostname — browser opens http://dev-box:3210
-kanna --host 192.168.1.x           # bind to a specific LAN IP
-kanna --host 100.64.x.x            # bind to a specific Tailscale IP
+nomi --remote                     # bind all interfaces — browser opens localhost:3210
+nomi --host dev-box               # bind to a specific hostname — browser opens http://dev-box:3210
+nomi --host 192.168.1.x           # bind to a specific LAN IP
+nomi --host 100.64.x.x            # bind to a specific Tailscale IP
 ```
 
 When `--host <hostname>` is given, the browser opens `http://<hostname>:3210` automatically. Other machines on your network can connect to the same URL:
@@ -138,8 +138,8 @@ When `--host <hostname>` is given, the browser opens `http://<hostname>:3210` au
 Use `--share` to create a temporary public `trycloudflare.com` URL and print a terminal QR code:
 
 ```bash
-kanna --share
-kanna --share --port 4000
+nomi --share
+nomi --share --port 4000
 ```
 
 `--share` is incompatible with `--host` and `--remote`. It does not open a browser automatically; instead it prints:
@@ -223,7 +223,7 @@ src/
 
 ## Data Storage
 
-All state is stored locally at `~/.kanna/data/`:
+All state is stored locally at `~/.nomi/data/`:
 
 | File             | Purpose                                   |
 | ---------------- | ----------------------------------------- |
@@ -233,15 +233,15 @@ All state is stored locally at `~/.kanna/data/`:
 | `turns.jsonl`    | Agent turn start/finish/cancel events     |
 | `snapshot.json`  | Compacted state snapshot for fast startup |
 
-Event logs are append-only JSONL. On startup, Kanna replays the log tail after the last snapshot, then compacts if the logs exceed 2 MB.
+Event logs are append-only JSONL. On startup, Nomi replays the log tail after the last snapshot, then compacts if the logs exceed 2 MB.
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=jakemor%2Fkanna&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=jakemor%2Fnomi&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=jakemor/kanna&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=jakemor/kanna&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=jakemor/kanna&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=jakemor/nomi&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=jakemor/nomi&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=jakemor/nomi&type=date&legend=top-left" />
  </picture>
 </a>
 

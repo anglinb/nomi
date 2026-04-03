@@ -6,7 +6,7 @@ import { DEFAULT_KEYBINDINGS } from "../shared/types"
 import { KeybindingsManager, normalizeKeybindings, readKeybindingsSnapshot } from "./keybindings"
 
 let tempDirs: string[] = []
-const TEST_FILE_PATH = "/tmp/kanna-test-keybindings.json"
+const TEST_FILE_PATH = "/tmp/nomi-test-keybindings.json"
 
 afterEach(async () => {
   await Promise.all(tempDirs.map((dir) => rm(dir, { recursive: true, force: true })))
@@ -14,7 +14,7 @@ afterEach(async () => {
 })
 
 async function createTempFilePath() {
-  const dir = await mkdtemp(path.join(tmpdir(), "kanna-keybindings-"))
+  const dir = await mkdtemp(path.join(tmpdir(), "nomi-keybindings-"))
   tempDirs.push(dir)
   return path.join(dir, "keybindings.json")
 }
@@ -116,17 +116,17 @@ describe("KeybindingsManager", () => {
   })
 
   test("uses the runtime profile for the default keybindings path", () => {
-    const previous = process.env.KANNA_RUNTIME_PROFILE
-    process.env.KANNA_RUNTIME_PROFILE = "dev"
+    const previous = process.env.NOMI_RUNTIME_PROFILE
+    process.env.NOMI_RUNTIME_PROFILE = "dev"
 
     const manager = new KeybindingsManager()
 
-    expect(manager.filePath).toEndWith("/.kanna-dev/keybindings.json")
+    expect(manager.filePath).toEndWith("/.nomi-dev/keybindings.json")
 
     if (previous === undefined) {
-      delete process.env.KANNA_RUNTIME_PROFILE
+      delete process.env.NOMI_RUNTIME_PROFILE
     } else {
-      process.env.KANNA_RUNTIME_PROFILE = previous
+      process.env.NOMI_RUNTIME_PROFILE = previous
     }
   })
 })

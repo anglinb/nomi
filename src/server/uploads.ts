@@ -87,7 +87,7 @@ export async function persistProjectUpload(args: {
     kind: mimeType.startsWith(IMAGE_MIME_PREFIX) ? "image" : "file",
     displayName: args.fileName,
     absolutePath,
-    relativePath: `./.kanna/uploads/${storedName}`,
+    relativePath: `./.nomi/uploads/${storedName}`,
     contentUrl: `/api/projects/${args.projectId}/uploads/${encodeURIComponent(storedName)}/content`,
     mimeType,
     size: args.bytes.byteLength,

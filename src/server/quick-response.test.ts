@@ -86,9 +86,9 @@ describe("QuickResponseAdapter", () => {
     expect(result).toBe("Codex title")
   })
 
-  test("uses the Kanna app data root as the quick-response workspace", async () => {
-    const previousProfile = process.env.KANNA_RUNTIME_PROFILE
-    process.env.KANNA_RUNTIME_PROFILE = "dev"
+  test("uses the Nomi app data root as the quick-response workspace", async () => {
+    const previousProfile = process.env.NOMI_RUNTIME_PROFILE
+    process.env.NOMI_RUNTIME_PROFILE = "dev"
 
     try {
       let claudeCwd = ""
@@ -118,12 +118,12 @@ describe("QuickResponseAdapter", () => {
       })
 
       expect(claudeCwd).toBe(getQuickResponseWorkspace(process.env))
-      expect(claudeCwd.endsWith("/.kanna-dev")).toBe(true)
+      expect(claudeCwd.endsWith("/.nomi-dev")).toBe(true)
     } finally {
       if (previousProfile === undefined) {
-        delete process.env.KANNA_RUNTIME_PROFILE
+        delete process.env.NOMI_RUNTIME_PROFILE
       } else {
-        process.env.KANNA_RUNTIME_PROFILE = previousProfile
+        process.env.NOMI_RUNTIME_PROFILE = previousProfile
       }
     }
   })

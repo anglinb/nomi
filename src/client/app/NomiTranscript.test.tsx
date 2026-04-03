@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
-import { KannaTranscript } from "./KannaTranscript"
+import { NomiTranscript } from "./NomiTranscript"
 
-describe("KannaTranscript", () => {
+describe("NomiTranscript", () => {
   test("renders user attachment cards outside the user bubble", () => {
     const html = renderToStaticMarkup(
-      <KannaTranscript
+      <NomiTranscript
         messages={[
           {
             id: "user-1",
@@ -15,8 +15,8 @@ describe("KannaTranscript", () => {
               id: "file-1",
               kind: "file",
               displayName: "spec.pdf",
-              absolutePath: "/tmp/project/.kanna/uploads/spec.pdf",
-              relativePath: "./.kanna/uploads/spec.pdf",
+              absolutePath: "/tmp/project/.nomi/uploads/spec.pdf",
+              relativePath: "./.nomi/uploads/spec.pdf",
               contentUrl: "/api/projects/project-1/uploads/spec.pdf/content",
               mimeType: "application/pdf",
               size: 1234,
@@ -40,7 +40,7 @@ describe("KannaTranscript", () => {
 
   test("renders uploaded image attachments using the server content URL", () => {
     const html = renderToStaticMarkup(
-      <KannaTranscript
+      <NomiTranscript
         messages={[
           {
             id: "user-2",
@@ -50,8 +50,8 @@ describe("KannaTranscript", () => {
               id: "image-1",
               kind: "image",
               displayName: "mock.png",
-              absolutePath: "/tmp/project/.kanna/uploads/mock.png",
-              relativePath: "./.kanna/uploads/mock.png",
+              absolutePath: "/tmp/project/.nomi/uploads/mock.png",
+              relativePath: "./.nomi/uploads/mock.png",
               contentUrl: "/api/projects/project-1/uploads/mock.png/content",
               mimeType: "image/png",
               size: 512,
@@ -75,7 +75,7 @@ describe("KannaTranscript", () => {
 
   test("renders images before file attachments and user text", () => {
     const html = renderToStaticMarkup(
-      <KannaTranscript
+      <NomiTranscript
         messages={[
           {
             id: "user-3",
@@ -86,8 +86,8 @@ describe("KannaTranscript", () => {
                 id: "image-2",
                 kind: "image",
                 displayName: "mock.png",
-                absolutePath: "/tmp/project/.kanna/uploads/mock.png",
-                relativePath: "./.kanna/uploads/mock.png",
+                absolutePath: "/tmp/project/.nomi/uploads/mock.png",
+                relativePath: "./.nomi/uploads/mock.png",
                 contentUrl: "/api/projects/project-1/uploads/mock.png/content",
                 mimeType: "image/png",
                 size: 512,
@@ -96,8 +96,8 @@ describe("KannaTranscript", () => {
                 id: "file-2",
                 kind: "file",
                 displayName: "spec.pdf",
-                absolutePath: "/tmp/project/.kanna/uploads/spec.pdf",
-                relativePath: "./.kanna/uploads/spec.pdf",
+                absolutePath: "/tmp/project/.nomi/uploads/spec.pdf",
+                relativePath: "./.nomi/uploads/spec.pdf",
                 contentUrl: "/api/projects/project-1/uploads/spec.pdf/content",
                 mimeType: "application/pdf",
                 size: 1234,

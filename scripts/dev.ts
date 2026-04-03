@@ -4,13 +4,23 @@ import { spawn, type ChildProcess } from "node:child_process"
 import { LOG_PREFIX } from "../src/shared/branding"
 import { parseDevArgs } from "../src/shared/dev-ports"
 import { logShareDetails, startShareTunnel } from "../src/server/share"
+import { ensureDevExample, DEV_EXAMPLE_PATH } from "./setup-dev-example"
 
 const cwd = process.cwd()
 const forwardedArgs = process.argv.slice(2)
 const bunBin = process.execPath
 const localHostname = getHostname()
 const devArgs = parseDevArgs(forwardedArgs, localHostname)
-const { clientPort, serverPort, serverArgs, share } = devArgs
+const { clientPort, serverPort, share } = devArgs
+let { serverArgs } = devArgs
+
+// Ensure the dev-example project exists and default --dir to it
+ensureDevExample()
+
+const hasExplicitDir = forwardedArgs.includes("--dir")
+if (!hasExplicitDir) {
+  serverArgs = [...serverArgs, "--dir", DEV_EXAMPLE_PATH]
+}
 
 const clientEnv = {
   ...process.env,

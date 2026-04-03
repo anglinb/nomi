@@ -4,9 +4,7 @@ import { APP_NAME, getRuntimeProfile } from "../shared/branding"
 import type { ChatAttachment } from "../shared/types"
 import { EventStore } from "./event-store"
 import { AgentCoordinator } from "./agent"
-import { discoverProjects, type DiscoveredProject } from "./discovery"
 import { KeybindingsManager } from "./keybindings"
-import { getMachineDisplayName } from "./machine-name"
 import { TerminalManager } from "./terminal-manager"
 import { UpdateManager } from "./update-manager"
 import type { UpdateInstallAttemptResult } from "./cli-runtime"
@@ -51,9 +49,10 @@ export async function persistUploadedFiles(args: {
   return attachments
 }
 
-export interface StartKannaServerOptions {
+export interface StartNomiServerOptions {
   port?: number
   host?: string
+  dir?: string
   strictPort?: boolean
   onMigrationProgress?: (message: string) => void
   update?: {
@@ -63,22 +62,13 @@ export interface StartKannaServerOptions {
   }
 }
 
-export async function startKannaServer(options: StartKannaServerOptions = {}) {
+export async function startNomiServer(options: StartNomiServerOptions = {}) {
   const port = options.port ?? 3210
   const hostname = options.host ?? "127.0.0.1"
   const strictPort = options.strictPort ?? false
   const store = new EventStore()
-  const machineDisplayName = getMachineDisplayName()
-  await store.initialize()
+  await store.initialize(options.dir)
   await store.migrateLegacyTranscripts(options.onMigrationProgress)
-  let discoveredProjects: DiscoveredProject[] = []
-
-  async function refreshDiscovery() {
-    discoveredProjects = discoverProjects()
-    return discoveredProjects
-  }
-
-  await refreshDiscovery()
 
   let server: ReturnType<typeof Bun.serve<ClientState>>
   let router: ReturnType<typeof createWsRouter>
@@ -104,9 +94,6 @@ export async function startKannaServer(options: StartKannaServerOptions = {}) {
     agent,
     terminals,
     keybindings,
-    refreshDiscovery,
-    getDiscoveredProjects: () => discoveredProjects,
-    machineDisplayName,
     updateManager,
   })
 

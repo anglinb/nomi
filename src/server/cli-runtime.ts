@@ -1,4 +1,5 @@
 import process from "node:process"
+import path from "node:path"
 import { spawnSync } from "node:child_process"
 import { hasCommand, spawnDetached } from "./process-utils"
 import { APP_NAME, CLI_COMMAND, getDataDirDisplay, LOG_PREFIX, PACKAGE_NAME } from "../shared/branding"
@@ -13,6 +14,7 @@ export interface CliOptions {
   openBrowser: boolean
   share: boolean
   strictPort: boolean
+  dir?: string
 }
 
 export interface CliUpdateOptions {
@@ -77,6 +79,7 @@ Usage:
   ${CLI_COMMAND} [options]
 
 Options:
+  --dir <path>         Working directory for agent sessions (default: cwd)
   --port <number>      Port to listen on (default: ${PROD_SERVER_PORT})
   --host <host>        Bind to a specific host or IP
   --remote             Shortcut for --host 0.0.0.0
@@ -95,6 +98,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   let sawHost = false
   let sawRemote = false
   let strictPort = false
+  let dir: string | undefined
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
@@ -103,6 +107,13 @@ export function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--help" || arg === "-h") {
       return { kind: "help" }
+    }
+    if (arg === "--dir") {
+      const next = argv[index + 1]
+      if (!next || next.startsWith("-")) throw new Error("Missing value for --dir")
+      dir = path.resolve(next)
+      index += 1
+      continue
     }
     if (arg === "--port") {
       const next = argv[index + 1]
@@ -151,6 +162,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
       openBrowser,
       share,
       strictPort,
+      dir,
     },
   }
 }
@@ -181,7 +193,7 @@ function normalizeVersion(version: string) {
 }
 
 async function maybeSelfUpdate(_argv: string[], deps: CliRuntimeDeps) {
-  if (process.env.KANNA_DISABLE_SELF_UPDATE === "1") {
+  if (process.env.NOMI_DISABLE_SELF_UPDATE === "1") {
     return null
   }
 
@@ -329,7 +341,7 @@ export function classifyInstallVersionFailure(output: string): UpdateInstallAtte
     ok: false,
     errorCode: "install_failed",
     userTitle: "Update failed",
-    userMessage: "Kanna could not install the update. Try again later.",
+    userMessage: "Nomi could not install the update. Try again later.",
   }
 }
 
@@ -339,7 +351,7 @@ export function installPackageVersion(packageName: string, version: string) {
       ok: false,
       errorCode: "command_missing",
       userTitle: "Bun not found",
-      userMessage: "Kanna could not find Bun to install the update.",
+      userMessage: "Nomi could not find Bun to install the update.",
     } satisfies UpdateInstallAttemptResult
   }
 

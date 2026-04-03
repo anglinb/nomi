@@ -4,7 +4,7 @@ import type {
   ChatAttachment,
   NormalizedToolCall,
   PendingToolSnapshot,
-  KannaStatus,
+  NomiStatus,
   TranscriptEntry,
 } from "../shared/types"
 import { normalizeToolCall } from "../shared/tools"
@@ -56,7 +56,7 @@ interface ActiveTurn {
   effort?: string
   serviceTier?: "fast"
   planMode: boolean
-  status: KannaStatus
+  status: NomiStatus
   pendingTool: PendingToolRequest | null
   postToolFollowUp: { content: string; planMode: boolean } | null
   hasFinalResult: boolean
@@ -137,9 +137,9 @@ export function buildAttachmentHintText(attachments: ChatAttachment[]) {
   ))
 
   return [
-    "<kanna-attachments>",
+    "<nomi-attachments>",
     ...lines,
-    "</kanna-attachments>",
+    "</nomi-attachments>",
   ].join("\n")
 }
 
@@ -487,7 +487,7 @@ export class AgentCoordinator {
   }
 
   getActiveStatuses() {
-    const statuses = new Map<string, KannaStatus>()
+    const statuses = new Map<string, NomiStatus>()
     for (const [chatId, turn] of this.activeTurns.entries()) {
       statuses.set(chatId, turn.status)
     }
@@ -763,9 +763,6 @@ export class AgentCoordinator {
     let chatId = command.chatId
 
     if (!chatId) {
-      if (!command.projectId) {
-        throw new Error("Missing projectId for new chat")
-      }
       const created = await this.store.createChat(command.projectId)
       chatId = created.id
     }

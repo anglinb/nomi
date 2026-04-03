@@ -11,21 +11,21 @@ import {
 describe("runtime profile helpers", () => {
   test("defaults to the prod profile when unset", () => {
     expect(getRuntimeProfile({})).toBe("prod")
-    expect(getDataRootName({})).toBe(".kanna")
-    expect(getDataDir("/tmp/home", {})).toBe("/tmp/home/.kanna/data")
-    expect(getDataDirDisplay({})).toBe("~/.kanna/data")
-    expect(getKeybindingsFilePath("/tmp/home", {})).toBe("/tmp/home/.kanna/keybindings.json")
-    expect(getKeybindingsFilePathDisplay({})).toBe("~/.kanna/keybindings.json")
+    expect(getDataRootName({})).toBe(".nomi")
+    expect(getDataDir("/tmp/home", {})).toBe("/tmp/home/.nomi/data")
+    expect(getDataDirDisplay({})).toBe("~/.nomi/data")
+    expect(getKeybindingsFilePath("/tmp/home", {})).toBe("/tmp/home/.nomi/keybindings.json")
+    expect(getKeybindingsFilePathDisplay({})).toBe("~/.nomi/keybindings.json")
   })
 
   test("switches to dev paths for the dev profile", () => {
-    const env = { KANNA_RUNTIME_PROFILE: "dev" }
+    const env = { NOMI_RUNTIME_PROFILE: "dev" }
 
     expect(getRuntimeProfile(env)).toBe("dev")
-    expect(getDataRootName(env)).toBe(".kanna-dev")
-    expect(getDataDir("/tmp/home", env)).toBe("/tmp/home/.kanna-dev/data")
-    expect(getDataDirDisplay(env)).toBe("~/.kanna-dev/data")
-    expect(getKeybindingsFilePath("/tmp/home", env)).toBe("/tmp/home/.kanna-dev/keybindings.json")
-    expect(getKeybindingsFilePathDisplay(env)).toBe("~/.kanna-dev/keybindings.json")
+    expect(getDataRootName(env)).toBe(".nomi-dev")
+    expect(getDataDir("/tmp/home", env)).toBe("/tmp/home/.nomi-dev/data")
+    expect(getDataDirDisplay(env)).toBe("~/.nomi-dev/data")
+    expect(getKeybindingsFilePath("/tmp/home", env)).toBe("/tmp/home/.nomi-dev/keybindings.json")
+    expect(getKeybindingsFilePathDisplay(env)).toBe("~/.nomi-dev/keybindings.json")
   })
 })

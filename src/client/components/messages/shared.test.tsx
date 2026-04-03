@@ -53,11 +53,11 @@ describe("markdownComponents", () => {
         remarkPlugins={[remarkGfm]}
         components={createMarkdownComponents({ onOpenLocalLink: () => {} })}
       >
-        {"[app.ts](/Users/jake/Projects/kanna/src/client/app/App.tsx#L1)"}
+        {"[app.ts](/Users/jake/Projects/nomi/src/client/app/App.tsx#L1)"}
       </Markdown>
     )
 
-    expect(html).toContain("/Users/jake/Projects/kanna/src/client/app/App.tsx#L1")
+    expect(html).toContain("/Users/jake/Projects/nomi/src/client/app/App.tsx#L1")
     expect(html).not.toContain('target="_blank"')
   })
 
@@ -68,12 +68,12 @@ describe("markdownComponents", () => {
           remarkPlugins={[remarkGfm]}
           components={createMarkdownComponents()}
         >
-          {"[app.ts](/Users/jake/Projects/kanna/src/client/app/App.tsx#L1)"}
+          {"[app.ts](/Users/jake/Projects/nomi/src/client/app/App.tsx#L1)"}
         </Markdown>
       </OpenLocalLinkProvider>
     )
 
-    expect(html).toContain("/Users/jake/Projects/kanna/src/client/app/App.tsx#L1")
+    expect(html).toContain("/Users/jake/Projects/nomi/src/client/app/App.tsx#L1")
     expect(html).not.toContain('target="_blank"')
   })
 })
