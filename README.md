@@ -1,16 +1,18 @@
 <p align="center">
   <img src="assets/icon.png" alt="Nomi" width="80" />
-</p> 
+</p>
 
 <h1 align="center">Nomi</h1>
 
 <p align="center">
-  <strong>A beautiful web UI for the Claude Code & Codex CLIs</strong>
+  <strong>A web IDE for Claude Code — editor, terminals, diffs, and chat in one place</strong>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/nomi-code"><img src="https://img.shields.io/npm/v/nomi-code.svg?style=flat&colorA=18181b&colorB=f472b6" alt="npm version" /></a>
 </p>
+
+> **Experimental fork of [Kanna](https://github.com/jakemor/kanna)** — this project builds on Kanna's excellent chat UI and agent coordination, adding embedded VS Code, standalone terminals, a diff viewer, and single-port multiplexing. Upstream changes are pulled in regularly. If you're looking for the stable original, head to [jakemor/kanna](https://github.com/jakemor/kanna).
 
 <br />
 
@@ -26,14 +28,18 @@
 
 ## Quickstart
 
+Install everything in one shot (Bun, Claude Code, and Nomi):
+
 ```bash
-bun install -g nomi-code
+curl -fsSL https://raw.githubusercontent.com/anglinb/nomi/main/install.sh | bash
 ```
 
-If Bun isn't installed, install it first:
+Or install manually:
 
 ```bash
-curl -fsSL https://bun.sh/install | bash
+curl -fsSL https://bun.sh/install | bash       # install Bun (if needed)
+curl -fsSL https://claude.ai/install.sh | bash  # install Claude Code (if needed)
+bun install -g nomi-code                        # install Nomi
 ```
 
 Then run from any project directory:
@@ -42,21 +48,32 @@ Then run from any project directory:
 nomi
 ```
 
-That's it. Nomi opens in your browser at [`localhost:3210`](http://localhost:3210).
+Nomi opens in your browser at [`localhost:3210`](http://localhost:3210).
 
-## Features
+## What's in this fork
 
-- **Multi-provider support** — switch between Claude and Codex (OpenAI) from the chat input, with per-provider model selection, reasoning effort controls, and Codex fast mode
+These features are **new in Nomi** on top of the upstream Kanna project:
+
+- **Embedded VS Code** — a full VS Code editor runs inside Nomi, one instance per project, accessible from the sidebar
+- **Standalone terminals** — terminals are first-class sidebar items with their own routes, not embedded in the chat view
+- **Git diff viewer** — full-page diff viewer with file/chunk navigation, word-level highlighting, and inline comments
+- **Single-port multiplexing** — VS Code, terminals, and Nomi all served through one port, so `--share` and reverse proxies just work
+- **One-line installer** — `curl | bash` installs Bun, Claude Code, and Nomi in one shot
+- **Sidebar toolbar** — quick-access buttons for Editor, Terminals, and Diffs with active-state indicators
+- **Auto-create first chat** — a chat is created automatically on startup so you land in a ready-to-use session
+- **Trusted npm publishing** — releases publish via GitHub Actions OIDC with provenance signing
+
+## Features (from upstream)
+
+- **Multi-provider support** — switch between Claude and Codex from the chat input, with per-provider model selection and reasoning effort controls
 - **Project-first sidebar** — chats grouped under projects, with live status indicators (idle, running, waiting, failed)
-- **Drag-and-drop project ordering** — reorder project groups in the sidebar with persistent ordering
-- **Local project discovery** — auto-discovers projects from both Claude and Codex local history
-- **Rich transcript rendering** — hydrated tool calls, collapsible tool groups, plan mode dialogs, and interactive prompts with full result display
-- **Quick responses** — lightweight structured queries (e.g. title generation) via Haiku with automatic Codex fallback
+- **Rich transcript rendering** — hydrated tool calls, collapsible tool groups, plan mode dialogs, and interactive prompts
 - **Plan mode** — review and approve agent plans before execution
 - **Persistent local history** — refresh-safe routes backed by JSONL event logs and compacted snapshots
 - **Auto-generated titles** — chat titles generated in the background via Claude Haiku
 - **Session resumption** — resume agent sessions with full context preservation
 - **WebSocket-driven** — real-time subscription model with reactive state broadcasting
+- **Public share links** — `--share` creates a temporary Cloudflare tunnel URL with terminal QR code
 
 ## Architecture
 
@@ -66,17 +83,15 @@ Browser (React + Zustand)
 Bun Server (HTTP + WS)
     ├── WSRouter ─── subscription & command routing
     ├── AgentCoordinator ─── multi-provider turn management
-    ├── ProviderCatalog ─── provider/model/effort normalization
-    ├── QuickResponseAdapter ─── structured queries with provider fallback
+    ├── VsCodeProxy ─── reverse-proxy VS Code through same port
+    ├── TerminalManager ─── PTY session lifecycle
     ├── EventStore ─── JSONL persistence + snapshot compaction
     └── ReadModels ─── derived views (sidebar, chat, projects)
-    ↕  stdio
-Claude Agent SDK / Codex App Server (local processes)
+    ↕  stdio / child process
+Claude Agent SDK / Codex App Server / VS Code Server
     ↕
 Local File System (~/.nomi/data/, project dirs)
 ```
-
-**Key patterns:** Event sourcing for all state mutations. CQRS with separate write (event log) and read (derived snapshots) paths. Reactive broadcasting — subscribers get pushed fresh snapshots on every state change. Multi-provider agent coordination with tool gating for user-approval flows. Provider-agnostic transcript hydration for unified rendering.
 
 ## Requirements
 
@@ -85,29 +100,6 @@ Local File System (~/.nomi/data/, project dirs)
 - *(Optional)* [Codex CLI](https://github.com/openai/codex) for Codex provider support
 
 Embedded terminal support uses Bun's native PTY APIs and currently works on macOS/Linux.
-
-## Install
-
-Install Nomi globally:
-
-```bash
-bun install -g nomi-code
-```
-
-If Bun isn't installed, install it first:
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
-Or clone and build from source:
-
-```bash
-git clone https://github.com/jakemor/nomi.git
-cd nomi
-bun install
-bun run build
-```
 
 ## Usage
 
@@ -125,13 +117,11 @@ Default URL: `http://localhost:3210`
 By default Nomi binds to `127.0.0.1` (localhost only). Use `--host` to bind a specific interface, or `--remote` as a shorthand for `0.0.0.0`:
 
 ```bash
-nomi --remote                     # bind all interfaces — browser opens localhost:3210
-nomi --host dev-box               # bind to a specific hostname — browser opens http://dev-box:3210
+nomi --remote                     # bind all interfaces
+nomi --host dev-box               # bind to a specific hostname
 nomi --host 192.168.1.x           # bind to a specific LAN IP
 nomi --host 100.64.x.x            # bind to a specific Tailscale IP
 ```
-
-When `--host <hostname>` is given, the browser opens `http://<hostname>:3210` automatically. Other machines on your network can connect to the same URL:
 
 ### Public share link
 
@@ -139,45 +129,26 @@ Use `--share` to create a temporary public `trycloudflare.com` URL and print a t
 
 ```bash
 nomi --share
-nomi --share --port 4000
 ```
 
-`--share` is incompatible with `--host` and `--remote`. It does not open a browser automatically; instead it prints:
-
-```text
-QR Code:
-...
-
-Public URL:
-https://<random>.trycloudflare.com
-
-Local URL:
-http://localhost:3210
-```
+`--share` is incompatible with `--host` and `--remote`.
 
 ## Development
 
 ```bash
+git clone https://github.com/anglinb/nomi.git
+cd nomi
+bun install
 bun run dev
 ```
 
-The same `--remote` and `--host` flags can be used with `bun run dev` for remote development.
-`--share` is also supported in dev mode and exposes the Vite client URL publicly:
-
-```bash
-bun run dev --share
-bun run dev --port 3333 --share
-```
-
-In dev, `--port` sets the Vite client port and the backend runs on `port + 1`, so `bun run dev --port 3333 --share` publishes `http://localhost:3333`.
-`--share` remains incompatible with `--host` and `--remote`.
-Use `bun run dev --port 4000` to run the Vite client on `4000` and the backend on `4001`.
+The same `--remote`, `--host`, and `--share` flags work in dev mode. Use `bun run dev --port 4000` to run the Vite client on `4000` and the backend on `4001`.
 
 Or run client and server separately:
 
 ```bash
-bun run dev:client   # http://localhost:5174
-bun run dev:server   # http://localhost:5175
+bun run dev:client   # Vite dev server
+bun run dev:server   # Bun backend
 ```
 
 ## Scripts
@@ -190,36 +161,6 @@ bun run dev:server   # http://localhost:5175
 | `bun run dev:client` | Vite dev server only         |
 | `bun run dev:server` | Bun backend only             |
 | `bun run start`      | Start production server      |
-
-## Project Structure
-
-```
-src/
-├── client/          React UI layer
-│   ├── app/         App router, pages, central state hook, socket client
-│   ├── components/  Messages, chat chrome, dialogs, buttons, inputs
-│   ├── hooks/       Theme, standalone mode detection
-│   ├── stores/      Zustand stores (chat input, preferences, project order)
-│   └── lib/         Formatters, path utils, transcript parsing
-├── server/          Bun backend
-│   ├── cli.ts       CLI entry point & browser launcher
-│   ├── server.ts    HTTP/WS server setup & static serving
-│   ├── agent.ts     AgentCoordinator (multi-provider turn management)
-│   ├── codex-app-server.ts  Codex App Server JSON-RPC client
-│   ├── provider-catalog.ts  Provider/model/effort normalization
-│   ├── quick-response.ts    Structured queries with provider fallback
-│   ├── ws-router.ts WebSocket message routing & subscriptions
-│   ├── event-store.ts  JSONL persistence, replay & compaction
-│   ├── discovery.ts Auto-discover projects from Claude and Codex local state
-│   ├── read-models.ts  Derive view models from event state
-│   └── events.ts    Event type definitions
-└── shared/          Shared between client & server
-    ├── types.ts     Core data types, provider catalog, transcript entries
-    ├── tools.ts     Tool call normalization and hydration
-    ├── protocol.ts  WebSocket message protocol
-    ├── ports.ts     Port configuration
-    └── branding.ts  App name, data directory paths
-```
 
 ## Data Storage
 
@@ -234,16 +175,6 @@ All state is stored locally at `~/.nomi/data/`:
 | `snapshot.json`  | Compacted state snapshot for fast startup |
 
 Event logs are append-only JSONL. On startup, Nomi replays the log tail after the last snapshot, then compacts if the logs exceed 2 MB.
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=jakemor%2Fnomi&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=jakemor/nomi&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=jakemor/nomi&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=jakemor/nomi&type=date&legend=top-left" />
- </picture>
-</a>
 
 ## License
 
