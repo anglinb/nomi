@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Code2, GitCompareArrows, Loader2, PanelLeft, Terminal, X, Menu, Plus, Settings } from "lucide-react"
+import { Code2, GitBranch, GitCompareArrows, Loader2, PanelLeft, Terminal, X, Menu, Plus, Settings } from "lucide-react"
 import { NomiIcon } from "../components/ui/nomi-icon"
 import { useLocation, useNavigate } from "react-router-dom"
 import { APP_NAME } from "../../shared/branding"
 import { Button } from "../components/ui/button"
 import { cn } from "../lib/utils"
 import { ChatRow } from "../components/chat-ui/sidebar/ChatRow"
+import { useDiffStore } from "../stores/diffStore"
 import { useTerminalLayoutStore } from "../stores/terminalLayoutStore"
 import type { SidebarData, SidebarChatRow, UpdateSnapshot } from "../../shared/types"
 import type { SocketStatus } from "./socket"
@@ -23,6 +24,7 @@ interface NomiSidebarProps {
   onExpand: () => void
   onCreateChat: () => void
   onDeleteChat: (chat: SidebarChatRow) => void
+  gitBranch: string | null
   updateSnapshot: UpdateSnapshot | null
   onInstallUpdate: () => void
 }
@@ -40,6 +42,7 @@ export function NomiSidebar({
   onExpand,
   onCreateChat,
   onDeleteChat,
+  gitBranch,
   updateSnapshot,
   onInstallUpdate,
 }: NomiSidebarProps) {
@@ -47,6 +50,9 @@ export function NomiSidebar({
   const navigate = useNavigate()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
+
+  // Diff file count from Zustand store
+  const diffFileCount = useDiffStore((state) => state.files.length)
 
   // Terminal state from Zustand store (client-side)
   const terminalProjects = useTerminalLayoutStore((store) => store.projects)
@@ -230,6 +236,14 @@ export function NomiSidebar({
           </div>
         </div>
 
+        {/* Git branch indicator */}
+        {gitBranch && (
+          <div className="flex items-center gap-1.5 px-3 pt-2 pb-0.5">
+            <GitBranch className="h-3 w-3 shrink-0 text-muted-foreground" />
+            <span className="truncate text-xs text-muted-foreground">{gitBranch}</span>
+          </div>
+        )}
+
         {/* Tool buttons — Editor + Diffs */}
         <div className="flex items-center gap-1 px-[7px] pt-[7px]">
           <button
@@ -259,6 +273,11 @@ export function NomiSidebar({
           >
             <GitCompareArrows className="h-3.5 w-3.5" />
             <span>Diffs</span>
+            {diffFileCount > 0 && (
+              <span className="ml-0.5 rounded-full bg-logo/15 px-1.5 py-0.5 text-[10px] font-medium text-logo">
+                {diffFileCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -284,8 +303,23 @@ export function NomiSidebar({
               </div>
             ) : null}
 
+            {/* Chats section */}
+            {hasVisibleChats || !isConnecting ? (
+              <div className="flex items-center justify-between px-2.5 pb-1 pt-1">
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Chats</span>
+                <button
+                  type="button"
+                  onClick={() => { onCreateChat() }}
+                  className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  title="New chat"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              </div>
+            ) : null}
+
             {!hasVisibleChats && !isConnecting ? (
-              <p className="text-sm text-slate-400 p-2 mt-6 text-center">No conversations yet</p>
+              <p className="text-sm text-slate-400 p-2 text-center">No conversations yet</p>
             ) : null}
 
             <div className="space-y-[2px]">
@@ -293,56 +327,57 @@ export function NomiSidebar({
             </div>
 
             {/* Terminals section */}
-            {allTerminals.length > 0 || hasVisibleChats ? (
-              <div className="mt-3">
-                <div className="flex items-center justify-between px-2.5 pb-1">
-                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Terminals</span>
-                  <button
-                    type="button"
-                    onClick={handleCreateTerminal}
-                    className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                    title="New terminal"
+            <div className="mt-3">
+              <div className="flex items-center justify-between px-2.5 pb-1">
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Terminals</span>
+                <button
+                  type="button"
+                  onClick={handleCreateTerminal}
+                  className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  title="New terminal"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              </div>
+              <div className="space-y-[2px]">
+                {allTerminals.map((terminal) => (
+                  <div
+                    key={terminal.id}
+                    data-terminal-id={terminal.id}
+                    className={cn(
+                      "group/row flex items-center gap-2 pl-2.5 pr-0.5 py-0.5 rounded-lg border transition-all cursor-pointer",
+                      activeTerminalId === terminal.id
+                        ? "bg-muted border-border"
+                        : "border-border/0 hover:bg-muted/20 hover:border-border"
+                    )}
+                    onClick={() => {
+                      navigate(`/terminal/${terminal.id}`)
+                      onClose()
+                    }}
                   >
-                    <Plus className="h-3 w-3" />
-                  </button>
-                </div>
-                <div className="space-y-[2px]">
-                  {allTerminals.map((terminal) => (
-                    <div
-                      key={terminal.id}
-                      data-terminal-id={terminal.id}
-                      className={cn(
-                        "group/row flex items-center gap-2 rounded-lg border px-2.5 pr-1 py-1.5 transition-all cursor-pointer",
-                        activeTerminalId === terminal.id
-                          ? "bg-muted border-border"
-                          : "border-border/0 hover:bg-muted/50 hover:border-border"
-                      )}
-                      onClick={() => {
-                        navigate(`/terminal/${terminal.id}`)
-                        onClose()
-                      }}
-                    >
-                      <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      <span className="flex-1 min-w-0 truncate text-sm">{terminal.title}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
+                    <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="flex-1 min-w-0 truncate text-sm translate-y-[-0.5px]">{terminal.title}</span>
+                    <div className="relative h-7 w-7 mr-[2px] shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute inset-0 h-7 w-7 opacity-100 cursor-pointer rounded-sm hover:!bg-transparent !border-0 md:opacity-0 md:group-hover/row:opacity-100"
+                        onClick={(event) => {
+                          event.stopPropagation()
                           removeTerminal(terminal.projectId, terminal.id)
                           if (activeTerminalId === terminal.id) {
                             navigate("/")
                           }
                         }}
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 group-hover/row:opacity-100 hover:bg-accent hover:text-foreground transition-all"
                         title="Close terminal"
                       >
-                        <X className="h-3 w-3" />
-                      </button>
+                        <X className="size-3.5" />
+                      </Button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            ) : null}
+            </div>
           </div>
         </div>
 
