@@ -10,6 +10,7 @@ import { NomiSidebar } from "./NomiSidebar"
 import { ChatPage } from "./ChatPage"
 import { SettingsPage } from "./SettingsPage"
 import { DiffsPage } from "./DiffsPage"
+import { TerminalPage } from "./TerminalPage"
 import { VsCodePage } from "./VsCodePage"
 import { useNomiState } from "./useNomiState"
 
@@ -153,6 +154,7 @@ export function App() {
             <Route path="/" element={<ChatPage />} />
             <Route path="/vscode" element={<VsCodePage />} />
             <Route path="/diffs" element={<DiffsPage />} />
+            <Route path="/terminal" element={<TerminalPage />} />
             <Route path="/settings" element={<Navigate to="/settings/general" replace />} />
             <Route path="/settings/:sectionId" element={<SettingsPage />} />
             <Route path="/chat/:chatId" element={<ChatPage />} />

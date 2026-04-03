@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Code2, GitCompareArrows, Loader2, PanelLeft, X, Menu, Plus, Settings } from "lucide-react"
+import { Code2, GitCompareArrows, Loader2, PanelLeft, Terminal, X, Menu, Plus, Settings } from "lucide-react"
 import { NomiIcon } from "../components/ui/nomi-icon"
 import { useLocation, useNavigate } from "react-router-dom"
 import { APP_NAME } from "../../shared/branding"
@@ -97,7 +97,8 @@ export function NomiSidebar({
   const isSettingsActive = location.pathname.startsWith("/settings")
   const isVsCodeActive = location.pathname === "/vscode"
   const isDiffsActive = location.pathname === "/diffs"
-  const isUtilityPageActive = isSettingsActive || isVsCodeActive || isDiffsActive
+  const isTerminalActive = location.pathname === "/terminal"
+  const isUtilityPageActive = isSettingsActive || isVsCodeActive || isDiffsActive || isTerminalActive
   const isConnecting = connectionStatus === "connecting" || !ready
   const statusLabel = isConnecting ? "Connecting" : connectionStatus === "connected" ? "Connected" : "Disconnected"
   const statusDotClass = connectionStatus === "connected" ? "bg-emerald-500" : "bg-amber-500"
@@ -203,7 +204,7 @@ export function NomiSidebar({
           </div>
         </div>
 
-        {/* Tool buttons — VS Code + Diffs */}
+        {/* Tool buttons — Editor, Terminal, Diffs */}
         <div className="flex items-center gap-1 px-[7px] pt-[7px]">
           <button
             type="button"
@@ -218,6 +219,20 @@ export function NomiSidebar({
           >
             <Code2 className="h-3.5 w-3.5" />
             <span>Editor</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { navigate("/terminal"); onClose() }}
+            title="Terminal"
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition-colors",
+              isTerminalActive
+                ? "bg-muted border-border text-foreground"
+                : "border-border/0 text-muted-foreground hover:bg-muted hover:border-border hover:text-foreground"
+            )}
+          >
+            <Terminal className="h-3.5 w-3.5" />
+            <span>Terminal</span>
           </button>
           <button
             type="button"

@@ -1,8 +1,7 @@
-import { Menu, PanelLeft, PanelRight, SquarePen, Terminal } from "lucide-react"
+import { Menu, PanelLeft, SquarePen } from "lucide-react"
 import { NomiIcon } from "../ui/nomi-icon"
 import { Button } from "../ui/button"
 import { CardHeader } from "../ui/card"
-import { HotkeyTooltip, HotkeyTooltipContent, HotkeyTooltipTrigger } from "../ui/tooltip"
 import { cn } from "../../lib/utils"
 
 interface Props {
@@ -11,12 +10,6 @@ interface Props {
   onExpandSidebar: () => void
   onNewChat: () => void
   localPath?: string
-  embeddedTerminalVisible?: boolean
-  onToggleEmbeddedTerminal?: () => void
-  rightSidebarVisible?: boolean
-  onToggleRightSidebar?: () => void
-  terminalShortcut?: string[]
-  rightSidebarShortcut?: string[]
 }
 
 export function ChatNavbar({
@@ -24,13 +17,6 @@ export function ChatNavbar({
   onOpenSidebar,
   onExpandSidebar,
   onNewChat,
-  localPath,
-  embeddedTerminalVisible = false,
-  onToggleEmbeddedTerminal,
-  rightSidebarVisible = false,
-  onToggleRightSidebar,
-  terminalShortcut,
-  rightSidebarShortcut,
 }: Props) {
   return (
     <CardHeader
@@ -76,45 +62,6 @@ export function ChatNavbar({
         </div>
 
         <div className="flex-1 min-w-0" />
-
-        <div className="flex items-center gap-1 flex-shrink-0 border border-border rounded-full px-1.5 py-1 backdrop-blur-lg">
-          {localPath && onToggleEmbeddedTerminal ? (
-            <HotkeyTooltip>
-              <HotkeyTooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onToggleEmbeddedTerminal}
-                  className={cn(
-                    "border border-border/0",
-                    embeddedTerminalVisible && "text-white"
-                  )}
-                >
-                  <Terminal className="h-4.5 w-4.5" />
-                </Button>
-              </HotkeyTooltipTrigger>
-              <HotkeyTooltipContent side="bottom" shortcut={terminalShortcut} />
-            </HotkeyTooltip>
-          ) : null}
-          {onToggleRightSidebar ? (
-            <HotkeyTooltip>
-              <HotkeyTooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onToggleRightSidebar}
-                  className={cn(
-                    "border border-border/0",
-                    rightSidebarVisible && "text-white"
-                  )}
-                >
-                  <PanelRight className="h-4.5 w-4.5" />
-                </Button>
-              </HotkeyTooltipTrigger>
-              <HotkeyTooltipContent side="bottom" shortcut={rightSidebarShortcut} />
-            </HotkeyTooltip>
-          ) : null}
-        </div>
       </div>
     </CardHeader>
   )
