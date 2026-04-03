@@ -14,6 +14,7 @@ import { TerminalPage } from "./TerminalPage"
 import { VsCodePage } from "./VsCodePage"
 import { useNomiState } from "./useNomiState"
 import { useGitBranch } from "../hooks/useGitBranch"
+import { useGitDiff } from "../hooks/useDiffExtractor"
 
 const VERSION_SEEN_STORAGE_KEY = "nomi:last-seen-version"
 
@@ -69,6 +70,7 @@ function NomiLayout() {
   const params = useParams()
   const state = useNomiState(params.chatId ?? null)
   const gitBranch = useGitBranch(state.socket, null)
+  useGitDiff(state.socket, null, state.connectionStatus === "connected")
   const chatSoundPreference = useChatSoundPreferencesStore((store) => store.chatSoundPreference)
   const chatSoundId = useChatSoundPreferencesStore((store) => store.chatSoundId)
   const currentVersion = SDK_CLIENT_APP.split("/")[1] ?? "unknown"

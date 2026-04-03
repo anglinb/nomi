@@ -206,6 +206,7 @@ export function useNomiState(activeChatId: string | null): NomiState {
   const inputRef = useRef<HTMLDivElement>(null)
   const initialScrollCompletedRef = useRef(false)
   const initialScrollFrameRef = useRef<number | null>(null)
+  const autoCreatedChatRef = useRef(false)
 
   useEffect(() => socket.onStatus(setConnectionStatus), [socket])
 
@@ -216,6 +217,23 @@ export function useNomiState(activeChatId: string | null): NomiState {
       setCommandError(null)
     })
   }, [socket])
+
+  // Auto-create a first chat when there are none
+  useEffect(() => {
+    if (!sidebarReady || activeChatId || autoCreatedChatRef.current) return
+    if (sidebarData.chats.length > 0) return
+    autoCreatedChatRef.current = true
+
+    void (async () => {
+      try {
+        const result = await socket.command<{ chatId: string }>({ type: "chat.create" })
+        setPendingChatId(result.chatId)
+        navigate(`/chat/${result.chatId}`, { replace: true })
+      } catch {
+        // Silently ignore — user can still create manually
+      }
+    })()
+  }, [sidebarReady, sidebarData.chats.length, activeChatId, socket, navigate])
 
   useEffect(() => {
     return socket.subscribe<UpdateSnapshot>({ type: "update" }, (snapshot) => {

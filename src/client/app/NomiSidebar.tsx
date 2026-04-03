@@ -8,6 +8,7 @@ import { cn } from "../lib/utils"
 import { ChatRow } from "../components/chat-ui/sidebar/ChatRow"
 import { useDiffStore } from "../stores/diffStore"
 import { useTerminalLayoutStore } from "../stores/terminalLayoutStore"
+import { useAppDialog } from "../components/ui/app-dialog"
 import type { SidebarData, SidebarChatRow, UpdateSnapshot } from "../../shared/types"
 import type { SocketStatus } from "./socket"
 
@@ -48,6 +49,7 @@ export function NomiSidebar({
 }: NomiSidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const dialog = useAppDialog()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
@@ -94,6 +96,20 @@ export function NomiSidebar({
       onClose()
     }
   }, [addTerminal, navigate, onClose])
+
+  const handleOpenTerminals = useCallback(() => {
+    const projectId = "default"
+    const layout = useTerminalLayoutStore.getState().projects[projectId]
+    // Navigate to the most recent terminal if one exists
+    if (layout && layout.terminals.length > 0) {
+      const mostRecent = layout.terminals[layout.terminals.length - 1]
+      navigate(`/terminal/${mostRecent.id}`)
+      onClose()
+      return
+    }
+    // No terminals — create a new one
+    handleCreateTerminal()
+  }, [handleCreateTerminal, navigate, onClose])
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -244,7 +260,7 @@ export function NomiSidebar({
           </div>
         )}
 
-        {/* Tool buttons — Editor + Diffs */}
+        {/* Tool buttons — Editor, Terminals, Diffs */}
         <div className="flex items-center gap-1 px-[7px] pt-[7px]">
           <button
             type="button"
@@ -259,6 +275,20 @@ export function NomiSidebar({
           >
             <Code2 className="h-3.5 w-3.5" />
             <span>Editor</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenTerminals}
+            title="Terminals"
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition-colors",
+              isTerminalRoute
+                ? "bg-muted border-border text-foreground"
+                : "border-border/0 text-muted-foreground hover:bg-muted hover:border-border hover:text-foreground"
+            )}
+          >
+            <Terminal className="h-3.5 w-3.5" />
+            <span>Terminals</span>
           </button>
           <button
             type="button"
@@ -326,58 +356,67 @@ export function NomiSidebar({
               {data.chats.map(renderChatRow)}
             </div>
 
-            {/* Terminals section */}
-            <div className="mt-3">
-              <div className="flex items-center justify-between px-2.5 pb-1">
-                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Terminals</span>
-                <button
-                  type="button"
-                  onClick={handleCreateTerminal}
-                  className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  title="New terminal"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
-              <div className="space-y-[2px]">
-                {allTerminals.map((terminal) => (
-                  <div
-                    key={terminal.id}
-                    data-terminal-id={terminal.id}
-                    className={cn(
-                      "group/row flex items-center gap-2 pl-2.5 pr-0.5 py-0.5 rounded-lg border transition-all cursor-pointer",
-                      activeTerminalId === terminal.id
-                        ? "bg-muted border-border"
-                        : "border-border/0 hover:bg-muted/20 hover:border-border"
-                    )}
-                    onClick={() => {
-                      navigate(`/terminal/${terminal.id}`)
-                      onClose()
-                    }}
+            {/* Terminals section — only shown when terminals exist */}
+            {allTerminals.length > 0 && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between px-2.5 pb-1">
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Terminals</span>
+                  <button
+                    type="button"
+                    onClick={handleCreateTerminal}
+                    className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="New terminal"
                   >
-                    <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span className="flex-1 min-w-0 truncate text-sm translate-y-[-0.5px]">{terminal.title}</span>
-                    <div className="relative h-7 w-7 mr-[2px] shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute inset-0 h-7 w-7 opacity-100 cursor-pointer rounded-sm hover:!bg-transparent !border-0 md:opacity-0 md:group-hover/row:opacity-100"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          removeTerminal(terminal.projectId, terminal.id)
-                          if (activeTerminalId === terminal.id) {
-                            navigate("/")
-                          }
-                        }}
-                        title="Close terminal"
-                      >
-                        <X className="size-3.5" />
-                      </Button>
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="space-y-[2px]">
+                  {allTerminals.map((terminal) => (
+                    <div
+                      key={terminal.id}
+                      data-terminal-id={terminal.id}
+                      className={cn(
+                        "group/row flex items-center gap-2 pl-2.5 pr-0.5 py-0.5 rounded-lg border transition-all cursor-pointer",
+                        activeTerminalId === terminal.id
+                          ? "bg-muted border-border"
+                          : "border-border/0 hover:bg-muted/20 hover:border-border"
+                      )}
+                      onClick={() => {
+                        navigate(`/terminal/${terminal.id}`)
+                        onClose()
+                      }}
+                    >
+                      <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="flex-1 min-w-0 truncate text-sm translate-y-[-0.5px]">{terminal.title}</span>
+                      <div className="relative h-7 w-7 mr-[2px] shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute inset-0 h-7 w-7 opacity-100 cursor-pointer rounded-sm hover:!bg-transparent !border-0 md:opacity-0 md:group-hover/row:opacity-100"
+                          onClick={async (event) => {
+                            event.stopPropagation()
+                            const confirmed = await dialog.confirm({
+                              title: "Close Terminal",
+                              description: `Close "${terminal.title}"? This cannot be undone.`,
+                              confirmLabel: "Close",
+                              confirmVariant: "destructive",
+                            })
+                            if (!confirmed) return
+                            removeTerminal(terminal.projectId, terminal.id)
+                            if (activeTerminalId === terminal.id) {
+                              navigate("/")
+                            }
+                          }}
+                          title="Close terminal"
+                        >
+                          <X className="size-3.5" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
