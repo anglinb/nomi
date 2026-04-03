@@ -11,9 +11,20 @@ import type { UpdateManager } from "./update-manager"
 import { VsCodeManager } from "./vscode-manager"
 import { deriveChatSnapshot, deriveSidebarData } from "./read-models"
 
-export interface ClientState {
+export interface NomiClientState {
+  type: "nomi"
   subscriptions: Map<string, SubscriptionTopic>
 }
+
+export interface VsCodeProxyState {
+  type: "vscode-proxy"
+  projectId: string
+  upstreamUrl: string
+  upstream: WebSocket | null
+  buffer: (string | ArrayBuffer)[] | null
+}
+
+export type ClientState = NomiClientState | VsCodeProxyState
 
 interface CreateWsRouterArgs {
   store: EventStore
@@ -24,7 +35,10 @@ interface CreateWsRouterArgs {
   vsCode: VsCodeManager
 }
 
-function send(ws: ServerWebSocket<ClientState>, message: ServerEnvelope) {
+/** The router only handles nomi-protocol connections (server.ts dispatches vscode-proxy separately). */
+type NomiSocket = ServerWebSocket<NomiClientState>
+
+function send(ws: NomiSocket, message: ServerEnvelope) {
   ws.send(JSON.stringify(message))
 }
 
@@ -36,7 +50,7 @@ export function createWsRouter({
   updateManager,
   vsCode,
 }: CreateWsRouterArgs) {
-  const sockets = new Set<ServerWebSocket<ClientState>>()
+  const sockets = new Set<NomiSocket>()
 
   function createEnvelope(id: string, topic: SubscriptionTopic): ServerEnvelope {
     if (topic.type === "sidebar") {
@@ -118,7 +132,7 @@ export function createWsRouter({
     }
   }
 
-  function pushSnapshots(ws: ServerWebSocket<ClientState>) {
+  function pushSnapshots(ws: NomiSocket) {
     for (const [id, topic] of ws.data.subscriptions.entries()) {
       send(ws, createEnvelope(id, topic))
     }
@@ -200,7 +214,7 @@ export function createWsRouter({
 
   agent.setBackgroundErrorReporter?.(broadcastError)
 
-  async function handleCommand(ws: ServerWebSocket<ClientState>, message: Extract<ClientEnvelope, { type: "command" }>) {
+  async function handleCommand(ws: NomiSocket, message: Extract<ClientEnvelope, { type: "command" }>) {
     const { command, id } = message
     try {
       switch (command.type) {
@@ -391,39 +405,41 @@ export function createWsRouter({
 
   return {
     handleOpen(ws: ServerWebSocket<ClientState>) {
-      sockets.add(ws)
+      // Safe cast: server.ts guarantees only nomi connections reach the router
+      sockets.add(ws as NomiSocket)
     },
     handleClose(ws: ServerWebSocket<ClientState>) {
-      sockets.delete(ws)
+      sockets.delete(ws as NomiSocket)
     },
     broadcastSnapshots,
     handleMessage(ws: ServerWebSocket<ClientState>, raw: string | Buffer | ArrayBuffer | Uint8Array) {
+      const nws = ws as NomiSocket
       let parsed: unknown
       try {
         parsed = JSON.parse(String(raw))
       } catch {
-        send(ws, { v: PROTOCOL_VERSION, type: "error", message: "Invalid JSON" })
+        send(nws, { v: PROTOCOL_VERSION, type: "error", message: "Invalid JSON" })
         return
       }
 
       if (!isClientEnvelope(parsed)) {
-        send(ws, { v: PROTOCOL_VERSION, type: "error", message: "Invalid envelope" })
+        send(nws, { v: PROTOCOL_VERSION, type: "error", message: "Invalid envelope" })
         return
       }
 
       if (parsed.type === "subscribe") {
-        ws.data.subscriptions.set(parsed.id, parsed.topic)
-        send(ws, createEnvelope(parsed.id, parsed.topic))
+        nws.data.subscriptions.set(parsed.id, parsed.topic)
+        send(nws, createEnvelope(parsed.id, parsed.topic))
         return
       }
 
       if (parsed.type === "unsubscribe") {
-        ws.data.subscriptions.delete(parsed.id)
-        send(ws, { v: PROTOCOL_VERSION, type: "ack", id: parsed.id })
+        nws.data.subscriptions.delete(parsed.id)
+        send(nws, { v: PROTOCOL_VERSION, type: "ack", id: parsed.id })
         return
       }
 
-      void handleCommand(ws, parsed)
+      void handleCommand(nws, parsed)
     },
     dispose() {
       agent.setBackgroundErrorReporter?.(null)

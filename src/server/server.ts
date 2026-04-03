@@ -12,6 +12,7 @@ import { createWsRouter, type ClientState } from "./ws-router"
 import { VsCodeManager } from "./vscode-manager"
 import { deleteProjectUpload, inferAttachmentContentType, persistProjectUpload } from "./uploads"
 import { getProjectUploadDir } from "./paths"
+import { proxyVsCodeHttp, initUpstreamConnection, relayClientMessage, cleanupUpstream } from "./vscode-proxy"
 
 const MAX_UPLOAD_FILES = 10
 const MAX_UPLOAD_SIZE_BYTES = 25 * 1024 * 1024
@@ -116,6 +117,7 @@ export async function startNomiServer(options: StartNomiServerOptions = {}) {
           if (url.pathname === "/ws") {
             const upgraded = serverInstance.upgrade(req, {
               data: {
+                type: "nomi" as const,
                 subscriptions: new Map(),
               },
             })
@@ -124,6 +126,34 @@ export async function startNomiServer(options: StartNomiServerOptions = {}) {
 
           if (url.pathname === "/health") {
             return Response.json({ ok: true, port: actualPort })
+          }
+
+          // VSCode reverse proxy — route /vscode/<projectId>/* to the child process
+          const vsMatch = url.pathname.match(/^\/vscode\/([^/]+)(\/.*)?$/)
+          if (vsMatch) {
+            const projectId = vsMatch[1]
+            const subPath = vsMatch[2] ?? "/"
+            const port = vsCode.getPort(projectId)
+            if (!port) {
+              return new Response("VS Code not running", { status: 502 })
+            }
+
+            // WebSocket upgrade
+            if (req.headers.get("upgrade")?.toLowerCase() === "websocket") {
+              const upgraded = serverInstance.upgrade(req, {
+                data: {
+                  type: "vscode-proxy" as const,
+                  projectId,
+                  upstreamUrl: `ws://127.0.0.1:${port}${subPath}${url.search}`,
+                  upstream: null,
+                  buffer: [],
+                },
+              })
+              return upgraded ? undefined : new Response("WebSocket upgrade failed", { status: 400 })
+            }
+
+            // HTTP proxy
+            return proxyVsCodeHttp(req, port, subPath, url.search)
           }
 
           const uploadResponse = await handleProjectUpload(req, url, store)
@@ -145,13 +175,25 @@ export async function startNomiServer(options: StartNomiServerOptions = {}) {
         },
         websocket: {
           open(ws) {
-            router.handleOpen(ws)
+            if (ws.data.type === "vscode-proxy") {
+              initUpstreamConnection(ws)
+            } else {
+              router.handleOpen(ws)
+            }
           },
           message(ws, raw) {
-            router.handleMessage(ws, raw)
+            if (ws.data.type === "vscode-proxy") {
+              relayClientMessage(ws, raw)
+            } else {
+              router.handleMessage(ws, raw)
+            }
           },
           close(ws) {
-            router.handleClose(ws)
+            if (ws.data.type === "vscode-proxy") {
+              cleanupUpstream(ws)
+            } else {
+              router.handleClose(ws)
+            }
           },
         },
       })

@@ -56,10 +56,10 @@ Examples:
 
 ```markdown
 ## New Features
-**Scheduled Automations** — Create automated recurring chats. [jane](https://github.com/jakemor/nomi/pull/123)
+**Scheduled Automations** — Create automated recurring chats. [jane](https://github.com/anglinb/nomi/pull/123)
 
 ## Improvements
-**Mobile Layout Fix** — Improved small-screen layout. [alex](https://github.com/jakemor/nomi/commit/abcdef1)
+**Mobile Layout Fix** — Improved small-screen layout. [alex](https://github.com/anglinb/nomi/commit/abcdef1)
 ```
 
 If there are no changes at all, use: `No changes this release.`
